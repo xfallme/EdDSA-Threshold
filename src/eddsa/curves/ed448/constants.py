@@ -1,0 +1,36 @@
+"""
+Constants for Ed448
+
+These values are taken from RFC 8032.
+RFC: https://datatracker.ietf.org/doc/html/rfc8032
+"""
+
+# Finite field modulus p
+p = 2**448 - 2**224 -  1
+
+# Bit size of the field
+b = 456
+
+# base 2 logarithm of cofactor
+c = 2
+
+n = 447
+
+# Curve Parameters d/a
+# d = -121665 * pow(121666, -1, p) % p
+d = -39081
+a = 1
+
+# Base point of the curve
+BASE_X = 224580040295924300187604334099896036246789641632564134246125461686950415467406032909029192869357953282578032075146446173674602635247710
+BASE_Y = 298819210078481492676017930443930673437544040154080242095928241372331506189835876003536878655418784733982303233503462500531545062832660
+BASE = (BASE_X, BASE_Y)
+
+# Order of ed25519
+L = 2**446 - 13818066809895115352007386748515426880336692474882178609894547503885
+
+# Encoding sizes (in bytes)
+SCALAR_SIZE = 57      # size of private scalar
+PUBLIC_KEY_SIZE = 57  # size of encoded public key
+SIGNATURE_SIZE = 114  # R || S
+SEED_SIZE = 57        # seed length specified by RFC 8032
