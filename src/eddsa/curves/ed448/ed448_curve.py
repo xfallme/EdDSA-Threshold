@@ -29,7 +29,7 @@ class Ed448Curve(EdwardsCurve):
         X2, Y2, Z2, _ = Q
 
         A = Z1 * Z2
-        B = A^2
+        B = A**2
         C = X1 * X2
         D = Y1 * Y2
         E = d * C * D
@@ -47,11 +47,11 @@ class Ed448Curve(EdwardsCurve):
     def doubling(self, P: Tuple) -> Tuple:
         X1, Y1, Z1, _ = P
 
-        B = (X1+Y1) ^ 2
-        C = X1^2
-        D = Y1^2
+        B = (X1+Y1) ** 2
+        C = X1**2
+        D = Y1**2
         E = C + D
-        H = Z1^2
+        H = Z1**2
         J = E - 2 * H
 
         X3 = self._field.mul((B - E), J)

@@ -48,11 +48,11 @@ class Ed25519Curve(EdwardsCurve):
     def doubling(self, P: Tuple) -> Tuple:
         X1, Y1, Z1, T1 = P
         
-        A = X1^2
-        B = Y1^2
-        C = 2 * Z1^2
+        A = X1**2
+        B = Y1**2
+        C = 2 * Z1**2
         H = A + B
-        E = H - (X1 + Y1)^2
+        E = H - (X1 + Y1)**2
         G = A - B
         F = C + G
         

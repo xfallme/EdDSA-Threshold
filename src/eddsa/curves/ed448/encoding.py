@@ -10,8 +10,8 @@ class Ed448Encoding(Encoding):
     Byte encoding/decoding layer for Ed448.
     """
 
-    def __init__(self, FieldOps: Ed448FieldOps):
-        self._field = FieldOps
+    def __init__(self, field_ops: Ed448FieldOps):
+        self._field = field_ops
 
     @property
     def scalar_size(self) -> int:
@@ -47,16 +47,16 @@ class Ed448Encoding(Encoding):
         if y >= self._field.p:
             raise ValueError("Invalid point encoding - y out of range")
         
-        u = y^2 - 1
-        v = d * y^2 - a
-        w = (u * v^3 * (u^5 * v^3)^((self._field.p - 3) // 4)) % self._field.p
+        u = y**2 - 1
+        v = d * y**2 - a
+        w = (u * v**3 * (u**5 * v**3)**((self._field.p - 3) // 4)) % self._field.p
         
-        if (v * w^2) == u:
+        if (v * w**2) == u:
             x = w
         else:
             raise ValueError("Invalid point encoding - SQRT failure")
         
-        if x == 0 & x_lsb == 1:
+        if x == 0 and x_lsb == 1:
             raise ValueError("Invalid point encoding - x is zero but lsb is 1")
         
         if (x % 2) == x_lsb:
