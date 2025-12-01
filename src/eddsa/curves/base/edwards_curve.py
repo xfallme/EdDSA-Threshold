@@ -56,7 +56,7 @@ class EdwardsCurve(ABC):
 
     # Point doubling
     @abstractmethod
-    def doubling(self, P: Tuple) -> Tuple:
+    def double(self, P: Tuple) -> Tuple:
         """Double point P."""
         raise NotImplementedError
 
@@ -70,6 +70,12 @@ class EdwardsCurve(ABC):
         for bit in reversed(bin(k)[2:]):
             if bit == '1':
                 Q = self.add(Q, P)
-            P = self.doubling(P)
+            P = self.double(P)
         
         return Q
+    
+    # Negate point
+    def negate(self, P: Tuple) -> Tuple:
+        """Negate point P."""
+        X, Y, Z, T = P
+        return (self.field.neg(X), Y, Z, self.field.neg(T))

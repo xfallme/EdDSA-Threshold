@@ -44,7 +44,7 @@ class Ed448Curve(EdwardsCurve):
         return (X3, Y3, Z3, _)
 
     # Point doubling
-    def doubling(self, P: Tuple) -> Tuple:
+    def double(self, P: Tuple) -> Tuple:
         X1, Y1, Z1, _ = P
 
         B = (X1+Y1) ** 2

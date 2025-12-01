@@ -45,7 +45,7 @@ class Ed25519Curve(EdwardsCurve):
         return (X3, Y3, Z3, T3)
 
     # Point doubling
-    def doubling(self, P: Tuple) -> Tuple:
+    def double(self, P: Tuple) -> Tuple:
         X1, Y1, Z1, T1 = P
         
         A = X1**2
