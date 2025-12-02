@@ -28,9 +28,9 @@ class Ed25519Encoding(Encoding):
         x, y = P
         y_bytes = y.to_bytes(self.point_size, byteorder='little')
         
-        x_lsb = x & 1
         y_bytes = bytearray(y_bytes)
-        y_bytes[-1] |= (x_lsb << 7)
+        if x & 1:
+            y_bytes[-1] |= 0x80
         
         return bytes(y_bytes)
 
@@ -47,11 +47,14 @@ class Ed25519Encoding(Encoding):
         if y >= self._field.p:
             raise ValueError("Invalid point encoding - y out of range")
         
-        u = y**2 - 1
-        v = d * y**2 - a
-        w = (u * v**3 * (u * v**7)**((self._field.p - 5) // 8)) % self._field.p
+        y2 = self._field.pow(y, 2)
+        u = (y2 - 1) % self._field.p
+        v = (d * y2 - a) % self._field.p
         
-        u = u % self._field.p
+        v3 = self._field.pow(v, 3)
+        v7 = self._field.pow(v, 7)
+        
+        w = (u * v3 * self._field.pow((u * v7), ((self._field.p - 5) // 8))) % self._field.p
         
         if (v * w**2) % self._field.p == u:
             x = w
