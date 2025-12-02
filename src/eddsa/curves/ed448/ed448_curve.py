@@ -6,6 +6,12 @@ from .constants import d, BASE
 
 
 class Ed448Curve(EdwardsCurve):
+    """
+    Ed448 curve implementation.
+
+    See base class EdwardsCurve for method descriptions.
+    """
+
     def __init__(self):
         self._field = Ed448FieldOps()
         self._encoding = Ed448Encoding(self._field)
@@ -22,7 +28,7 @@ class Ed448Curve(EdwardsCurve):
     @property
     def base_point(self):
         return BASE
-    
+
     # Point addition
     def add(self, P: Tuple, Q: Tuple) -> Tuple:
         X1, Y1, Z1, _ = P

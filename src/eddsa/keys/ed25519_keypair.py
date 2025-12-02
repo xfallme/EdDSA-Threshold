@@ -6,6 +6,11 @@ from eddsa.util.hash_bindings import sha512
 
 
 class Ed25519Keypair(Keypair):
+    """
+    Ed25519 keypair implementation.
+
+    Provides methods to create an Ed25519 keypair from a private seed or to generate a fresh random keypair.
+    """
 
     @classmethod
     def from_private_bytes(cls, seed: bytes) -> Keypair:

@@ -3,6 +3,14 @@ from typing import Tuple
 
 
 class EdwardsCurve(ABC):
+    """
+    Abstract base class for Edwards curves.
+
+    Provides methods for point encoding/decoding, coordinate conversions, scalar multiplication, and negation.
+
+    Concrete implementations must provide field operations, encoding, the base point, and point addition/doubling.
+    """
+
     @property
     @abstractmethod
     def field(self):
@@ -21,8 +29,6 @@ class EdwardsCurve(ABC):
         """Return affine base point as (x, y)."""
         raise NotImplementedError
 
-    # Encode and decode points
-
     def encode_extended_point(self, P: Tuple) -> bytes:
         """Encode point from (X, Y, Z, T) to bytes."""
         return self.encode_affine_point(self.extended_to_affine(P))
@@ -35,8 +41,6 @@ class EdwardsCurve(ABC):
         """Decode point from bytes to (x, y)."""
         return self.encoding.decode_point(data)
 
-    # Convert between coordinate systems
-
     def affine_to_extended(self, P: Tuple):
         """Convert (x, y) → (X, Y, Z, T)."""
         x, y = P
@@ -48,33 +52,29 @@ class EdwardsCurve(ABC):
         z_inv = self.field.inv(Z)
         return (self.field.mul(X, z_inv), self.field.mul(Y, z_inv))
 
-    # Point addition
     @abstractmethod
     def add(self, P: Tuple, Q: Tuple) -> Tuple:
         """Add points P and Q."""
         raise NotImplementedError
 
-    # Point doubling
     @abstractmethod
     def double(self, P: Tuple) -> Tuple:
         """Double point P."""
         raise NotImplementedError
 
-    # Scalar multiplication
     def scalar_mult(self, k: int, P=None) -> Tuple:
         """Multiply point P by scalar k using double-and-add algorithm. If P is None, use the base point."""
         if P is None:
             P = self.affine_to_extended(self.base_point)
-        
+
         Q = (0, 1, 1, 0)  # Neutral element in extended coordinates
         for bit in reversed(bin(k)[2:]):
             if bit == '1':
                 Q = self.add(Q, P)
             P = self.double(P)
-        
+
         return Q
-    
-    # Negate point
+
     def negate(self, P: Tuple) -> Tuple:
         """Negate point P."""
         X, Y, Z, T = P
