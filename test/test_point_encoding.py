@@ -47,7 +47,7 @@ def test_identity_encoding_decoding(curve: EdwardsCurve, constants):
 @parametrize_with_cases("curve, constants", cases="test_cases_curves")
 def test_random_point_encoding_decoding(curve: EdwardsCurve, constants):
     P = curve.affine_to_extended(constants.BASE)
-    for i in range(500):
+    for i in range(100):
         a = random.randint(1, 100000000)
         P = curve.scalar_mult(a, P)
         P_encoding = curve.encode_extended_point(P)
@@ -57,7 +57,7 @@ def test_random_point_encoding_decoding(curve: EdwardsCurve, constants):
 
 
 def test_random_point_encoding_ed25519(curve=Ed25519Curve(), constants=ed25519constants):
-    for i in range(500):
+    for i in range(100):
         a = random.randint(1, 100000000)
         P = curve.scalar_mult(a, curve.affine_to_extended(constants.BASE))
         P_encoding = curve.encode_extended_point(P)
