@@ -1,8 +1,10 @@
 from pytest_cases import parametrize_with_cases
 
+from eddsa.curves.base.field_ops import FieldOps
+
 
 @parametrize_with_cases("field", cases="test_cases_fields")
-def test_add(field):
+def test_add(field: FieldOps):
     """Test field addition"""
     x = 123456789012345678901234567890
     y = 987654321098765432109876543210
@@ -12,7 +14,7 @@ def test_add(field):
 
 
 @parametrize_with_cases("field", cases="test_cases_fields")
-def test_sub(field):
+def test_sub(field: FieldOps):
     """Test field subtraction"""
     x = 987654321098765432109876543210
     y = 1123456789012345678901234567890
@@ -22,7 +24,7 @@ def test_sub(field):
 
 
 @parametrize_with_cases("field", cases="test_cases_fields")
-def test_mul(field):
+def test_mul(field: FieldOps):
     """Test field multiplication"""
     x = 12345678901234567890
     y = 98765432109876543210
@@ -32,7 +34,7 @@ def test_mul(field):
 
 
 @parametrize_with_cases("field", cases="test_cases_fields")
-def test_neg(field):
+def test_neg(field: FieldOps):
     """Test field negation"""
     x = 123456789012345678901234567890
     result = field.neg(x)
@@ -41,7 +43,7 @@ def test_neg(field):
 
 
 @parametrize_with_cases("field", cases="test_cases_fields")
-def test_inv(field):
+def test_inv(field: FieldOps):
     """Test field inversion"""
     x = 123456789012345678901234567890
     inv_x = field.inv(x)
@@ -50,7 +52,7 @@ def test_inv(field):
 
 
 @parametrize_with_cases("field", cases="test_cases_fields")
-def test_sqr(field):
+def test_sqr(field: FieldOps):
     """Test field squaring"""
     x = 123456789012345678901234567890
     result = field.sqr(x)
@@ -59,7 +61,7 @@ def test_sqr(field):
 
 
 @parametrize_with_cases("field", cases="test_cases_fields")
-def test_pow(field):
+def test_pow(field: FieldOps):
     """Test field exponentiation"""
     x = 123456789012345678901234567890
     e = 1234567890
@@ -69,7 +71,7 @@ def test_pow(field):
 
 
 @parametrize_with_cases("field", cases="test_cases_fields")
-def test_reduce(field):
+def test_reduce(field: FieldOps):
     """Test field reduction"""
     x = field.p + 12345678901234567890
     result = field.reduce(x)

@@ -6,8 +6,6 @@ from pytest_cases import parametrize_with_cases
 from eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa.curves.ed25519.ed25519_curve import Ed25519Curve
 from eddsa.curves.ed25519 import constants as ed25519constants
-from eddsa.curves.ed448.ed448_curve import Ed448Curve
-from eddsa.curves.ed448 import constants as ed448constants
 
 
 @parametrize_with_cases("curve, constants", cases="test_cases_curves")
