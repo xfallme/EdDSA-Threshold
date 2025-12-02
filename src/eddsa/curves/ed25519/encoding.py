@@ -56,10 +56,12 @@ class Ed25519Encoding(Encoding):
         
         w = (u * v3 * self._field.pow((u * v7), ((self._field.p - 5) // 8))) % self._field.p
         
-        if (v * w**2) % self._field.p == u:
+        w2 = self._field.sqr(w)
+        
+        if (v * w2) % self._field.p == u:
             x = w
-        elif (v * w**2) % self._field.p == -u:
-            x = (w * 2**((self._field.p - 1) // 4))
+        elif (v * w2) % self._field.p == self._field.neg(u):
+            x = (w * self._field.pow(2, ((self._field.p - 1) // 4))) % self._field.p
         else:
             raise ValueError("Invalid point encoding - SQRT failure")
         

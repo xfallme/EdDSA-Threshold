@@ -1,3 +1,4 @@
+import random
 from nacl.bindings import crypto_scalarmult_ed25519_base_noclamp
 
 from pytest_cases import parametrize_with_cases
@@ -33,9 +34,35 @@ def test_base_encoding_decoding(curve: EdwardsCurve, constants):
 
     assert constants.BASE == base_decoding
 
+
 @parametrize_with_cases("curve, constants", cases="test_cases_curves")
 def test_identity_encoding_decoding(curve: EdwardsCurve, constants):
-    identity_encoding = curve.encode_affine_point(constants.IDENTITY)  # type: ignore
+    identity_encoding = curve.encode_affine_point(
+        constants.IDENTITY)  # type: ignore
     identity_decoding = curve.decode_point(identity_encoding)
 
     assert constants.IDENTITY == identity_decoding
+
+
+@parametrize_with_cases("curve, constants", cases="test_cases_curves")
+def test_random_point_encoding_decoding(curve: EdwardsCurve, constants):
+    P = curve.affine_to_extended(constants.BASE)
+    for i in range(500):
+        a = random.randint(1, 100000000)
+        P = curve.scalar_mult(a, P)
+        P_encoding = curve.encode_extended_point(P)
+        P_decoding = curve.decode_point(P_encoding)
+
+        assert curve.extended_to_affine(P) == P_decoding
+
+
+def test_random_point_encoding_ed25519(curve=Ed25519Curve(), constants=ed25519constants):
+    for i in range(500):
+        a = random.randint(1, 100000000)
+        P = curve.scalar_mult(a, curve.affine_to_extended(constants.BASE))
+        P_encoding = curve.encode_extended_point(P)
+
+        P_encoding_nacl = crypto_scalarmult_ed25519_base_noclamp(
+            a.to_bytes(constants.PUBLIC_KEY_SIZE, "little"))
+
+        assert P_encoding == P_encoding_nacl
