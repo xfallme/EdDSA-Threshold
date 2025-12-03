@@ -16,16 +16,16 @@ class Ed25519():
     def sign(message: bytes, keypair: Keypair) -> bytes:
         """Sign a message using the provided Ed25519 keypair."""
 
-        return Ed25519.__sign(message, keypair, ph=lambda m: m, dom2=dom2(0, None))
+        return Ed25519._sign(message, keypair, ph=lambda m: m, dom2=dom2(0, None))
     
     @staticmethod
     def verify(signature: bytes, message: bytes, public_key: bytes) -> bool:
         """Verify a signature for a message using the provided Ed25519 public key."""
         
-        return Ed25519.__verify(signature, message, public_key, ph=lambda m: m, dom2=dom2(0, None))
+        return Ed25519._verify(signature, message, public_key, ph=lambda m: m, dom2=dom2(0, None))
 
     @staticmethod
-    def __sign(message: bytes, keypair: Keypair, ph: Callable, dom2: bytes) -> bytes:
+    def _sign(message: bytes, keypair: Keypair, ph: Callable, dom2: bytes) -> bytes:
         """Internal sign method as basis for subclasses."""
 
         curve = Ed25519Curve()
@@ -52,7 +52,7 @@ class Ed25519():
         return R + S.to_bytes(32, byteorder='little')
 
     @staticmethod
-    def __verify(signature: bytes, message: bytes, public_key: bytes, ph: Callable, dom2: bytes) -> bool:
+    def _verify(signature: bytes, message: bytes, public_key: bytes, ph: Callable, dom2: bytes) -> bool:
         """Internal verify method as basis for subclasses."""
 
         curve = Ed25519Curve()
