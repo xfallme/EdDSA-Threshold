@@ -12,15 +12,13 @@ from eddsa.curves.ed25519 import constants as ed25519constants
 def test_identity_encoding(curve: EdwardsCurve, constants):
     identity_encoding = curve.encode_affine_point(constants.IDENTITY)
 
-    assert identity_encoding == (1).to_bytes(
-        constants.PUBLIC_KEY_SIZE, "little")
+    assert identity_encoding == (1).to_bytes(constants.PUBLIC_KEY_SIZE, "little")
 
 
 def test_base_encoding_ed25519(curve=Ed25519Curve(), constants=ed25519constants):
     # No direct libsodium access for Ed448 base point encoding test
     base_encoding = curve.encode_affine_point(constants.BASE)  # type: ignore
-    base_encoding_nacl = crypto_scalarmult_ed25519_base_noclamp(
-        (1).to_bytes(constants.PUBLIC_KEY_SIZE, "little"))
+    base_encoding_nacl = crypto_scalarmult_ed25519_base_noclamp((1).to_bytes(constants.PUBLIC_KEY_SIZE, "little"))
 
     assert base_encoding == base_encoding_nacl
 
@@ -35,8 +33,7 @@ def test_base_encoding_decoding(curve: EdwardsCurve, constants):
 
 @parametrize_with_cases("curve, constants", cases="test_cases_curves")
 def test_identity_encoding_decoding(curve: EdwardsCurve, constants):
-    identity_encoding = curve.encode_affine_point(
-        constants.IDENTITY)  # type: ignore
+    identity_encoding = curve.encode_affine_point(constants.IDENTITY)  # type: ignore
     identity_decoding = curve.decode_point(identity_encoding)
 
     assert constants.IDENTITY == identity_decoding
@@ -60,7 +57,6 @@ def test_random_point_encoding_ed25519(curve=Ed25519Curve(), constants=ed25519co
         P = curve.scalar_mult(a, curve.affine_to_extended(constants.BASE))
         P_encoding = curve.encode_extended_point(P)
 
-        P_encoding_nacl = crypto_scalarmult_ed25519_base_noclamp(
-            a.to_bytes(constants.PUBLIC_KEY_SIZE, "little"))
+        P_encoding_nacl = crypto_scalarmult_ed25519_base_noclamp(a.to_bytes(constants.PUBLIC_KEY_SIZE, "little"))
 
         assert P_encoding == P_encoding_nacl

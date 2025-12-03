@@ -12,8 +12,8 @@ def test_to_affine(curve: EdwardsCurve, constants):
     Z_ext = curve.affine_to_extended(constants.IDENTITY)
     Z_aff = curve.extended_to_affine(Z_ext)
 
-    assert P_aff == curve.base_point
-    assert Z_aff == constants.IDENTITY
+    assert P_aff == curve.base_point, "Base point conversion to affine failed"
+    assert Z_aff == constants.IDENTITY, "Identity point conversion to affine failed"
 
 
 @parametrize_with_cases("curve, constants", cases="test_cases_curves")

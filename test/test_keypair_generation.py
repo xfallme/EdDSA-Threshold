@@ -16,8 +16,8 @@ def test_keypair_generation_ed25519(lines, request):
         keypair = Ed25519Keypair.from_private_bytes(sk)
         pk = keypair.public_bytes()
 
-        assert x[0] == binascii.hexlify(sk + pk).decode('ascii')
-        assert x[1] == binascii.hexlify(pk).decode('ascii')
+        assert x[0] == binascii.hexlify(sk + pk).decode('ascii'), "Secret key/Public key does not match expected value"
+        assert x[1] == binascii.hexlify(pk).decode('ascii'), "Public key does not match expected value"
 
 
 @pytest.mark.parametrize("lines", [case_ed448_test_vectors_rfc8032()], ids=["Ed448 Test Vectors from RFC8032"])
@@ -31,5 +31,5 @@ def test_keypair_generation_ed448(lines, request):
         keypair = Ed448Keypair.from_private_bytes(sk)
         pk = keypair.public_bytes()
 
-        assert x[0] == binascii.hexlify(sk).decode('ascii')
-        assert x[1] == binascii.hexlify(pk).decode('ascii')
+        assert x[0] == binascii.hexlify(sk).decode('ascii'), "Secret key does not match expected value"
+        assert x[1] == binascii.hexlify(pk).decode('ascii'), "Public key does not match expected value"

@@ -35,8 +35,8 @@ def test_commutativity(curve: EdwardsCurve, constants):
     sum1 = curve.add(P, Q)
     sum2 = curve.add(Q, P)
 
-    assert sum1 == sum2
-    assert curve.extended_to_affine(sum1) == curve.extended_to_affine(sum2)
+    assert sum1 == sum2, "Addition results differ"
+    assert curve.extended_to_affine(sum1) == curve.extended_to_affine(sum2), "Affine coordinates differ"
 
 
 @parametrize_with_cases("curve, constants", cases="test_cases_curves")
@@ -60,8 +60,7 @@ def test_doubling(curve: EdwardsCurve, constants):
     doubled = curve.double(P)
     scalar_doubled = curve.scalar_mult(2, P)
 
-    assert curve.extended_to_affine(
-        doubled) == curve.extended_to_affine(scalar_doubled)
+    assert curve.extended_to_affine(doubled) == curve.extended_to_affine(scalar_doubled)
 
 
 @parametrize_with_cases("curve, constants", cases="test_cases_curves")
@@ -86,7 +85,6 @@ def test_random_additions(curve: EdwardsCurve, constants):
             left = curve.scalar_mult(a + b, P)
             right = curve.add(A, B)
 
-            assert curve.extended_to_affine(
-                left) == curve.extended_to_affine(right)
+            assert curve.extended_to_affine(left) == curve.extended_to_affine(right)
 
             P = curve.scalar_mult(a, P)
