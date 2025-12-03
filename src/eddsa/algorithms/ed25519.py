@@ -2,6 +2,7 @@ from typing import Callable
 from eddsa.curves.ed25519.ed25519_curve import Ed25519Curve
 from eddsa.curves.ed25519.scalar_ops import Ed25519ScalarOps
 from eddsa.keys.keypair import Keypair
+from eddsa.util.dom import dom2
 from eddsa.util.hash_bindings import sha512
 
 
@@ -15,13 +16,13 @@ class Ed25519():
     def sign(message: bytes, keypair: Keypair) -> bytes:
         """Sign a message using the provided Ed25519 keypair."""
 
-        return Ed25519.__sign(message, keypair, ph=lambda m: m, dom2=b"")
+        return Ed25519.__sign(message, keypair, ph=lambda m: m, dom2=dom2(0, None))
     
     @staticmethod
     def verify(signature: bytes, message: bytes, public_key: bytes) -> bool:
         """Verify a signature for a message using the provided Ed25519 public key."""
         
-        return Ed25519.__verify(signature, message, public_key, ph=lambda m: m, dom2=b"")
+        return Ed25519.__verify(signature, message, public_key, ph=lambda m: m, dom2=dom2(0, None))
 
     @staticmethod
     def __sign(message: bytes, keypair: Keypair, ph: Callable, dom2: bytes) -> bytes:
