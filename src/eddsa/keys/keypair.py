@@ -30,8 +30,12 @@ class Keypair(ABC):
 
     @classmethod
     @abstractmethod
-    def from_private_bytes(cls, seed: bytes) -> Keypair: ...
+    def from_private_bytes(cls, seed: bytes) -> Keypair: 
+        """Create a keypair from the given private seed bytes."""
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def generate(cls) -> Keypair: ...
+    def generate(cls) -> Keypair: 
+        """Generate a fresh random keypair."""
+        raise NotImplementedError
