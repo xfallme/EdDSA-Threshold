@@ -1,7 +1,4 @@
-from typing import Callable
 from eddsa.algorithms.ed25519 import Ed25519
-from eddsa.curves.ed25519.ed25519_curve import Ed25519Curve
-from eddsa.curves.ed25519.scalar_ops import Ed25519ScalarOps
 from eddsa.keys.keypair import Keypair
 from eddsa.util.dom import dom2
 from eddsa.util.hash_bindings import sha512
