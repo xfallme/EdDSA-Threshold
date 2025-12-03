@@ -30,7 +30,7 @@ def test_ed25519_signature(lines, request):
         assert is_valid, "Signature verification failed"
 
 
-@pytest.mark.parametrize("lines", [case_ed25519ctx_test_vectors_rfc8032()], ids=["Ed25519CTX Test Vectors from RFC8032"])
+@pytest.mark.parametrize("lines", [case_ed25519ctx_test_vectors_rfc8032()], ids=["Ed25519CTX RFC8032"])
 def test_ed25519ctx_signature(lines, request):
     print(f"Running with {len(lines)} inputs for test '{request.node.callspec.id}'")
 
@@ -55,7 +55,7 @@ def test_ed25519ctx_signature(lines, request):
         assert is_valid, "Signature verification failed"
 
 
-@pytest.mark.parametrize("lines", [case_ed25519ph_test_vectors_rfc8032()], ids=["Ed25519PH Test Vectors from RFC8032"])
+@pytest.mark.parametrize("lines", [case_ed25519ph_test_vectors_rfc8032()], ids=["Ed25519PH RFC8032"])
 def test_ed25519ph_signature(lines, request):
     print(f"Running with {len(lines)} inputs for test '{request.node.callspec.id}'")
 
