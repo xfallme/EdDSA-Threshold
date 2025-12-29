@@ -32,8 +32,8 @@ class Ed448():
         scalar_ops = Ed448ScalarOps()
 
         # Sign message according to RFC 8032 Section 5.2.6
-        # 1. Hash the private key
-        prefix = shake256(keypair.private_bytes(), 114)[57:]
+        # 1. Get precomputed prefix
+        prefix = keypair.prefix()
 
         # 2. Compute the nonce
         r = int.from_bytes(shake256(dom4 + prefix + ph(message), 114), byteorder='little')

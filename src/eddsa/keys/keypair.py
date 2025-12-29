@@ -10,10 +10,11 @@ class Keypair(ABC):
     These allow for keypair creation from a private seed or generation of a fresh random keypair.
     """
 
-    def __init__(self, seed: bytes, scalar: int, public_bytes: bytes):
-        """Initialize Keypair with private seed, scalar, and public key bytes."""
+    def __init__(self, seed: bytes, scalar: int, prefix: bytes, public_bytes: bytes):
+        """Initialize Keypair with private seed, scalar, prefix, and public key bytes."""
         self._private_bytes = seed
         self._scalar = scalar
+        self._prefix = prefix
         self._public_bytes = public_bytes
 
     def private_bytes(self) -> bytes:
@@ -23,6 +24,10 @@ class Keypair(ABC):
     def scalar(self) -> int:
         """Return the integer scalar derived from the private seed."""
         return self._scalar
+    
+    def prefix(self) -> bytes:
+        """Return the prefix bytes derived from the private seed."""
+        return self._prefix
 
     def public_bytes(self) -> bytes:
         """Return the public key bytes corresponding to the keypair."""

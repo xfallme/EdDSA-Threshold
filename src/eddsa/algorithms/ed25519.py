@@ -32,8 +32,8 @@ class Ed25519():
         scalar_ops = Ed25519ScalarOps()
 
         # Sign message according to RFC 8032 Section 5.1.6
-        # 1. Hash the private key
-        prefix = sha512(keypair.private_bytes())[32:]
+        # 1. Get precomputed prefix
+        prefix = keypair.prefix()
 
         # 2. Compute the nonce
         r = int.from_bytes(sha512(dom2 + prefix + ph(message)), byteorder='little')

@@ -30,13 +30,15 @@ class Ed448Keypair(Keypair):
 
         # 3. Convert to integer scalar
         scalar = int.from_bytes(a_bytes, byteorder='little')
+        
+        # 4. Compute prefix
+        prefix = hashed[57:]
 
-        # 4. Compute public key
+        # 5. Compute public key
         curve = Ed448Curve()
         public_bytes = curve.encode_extended_point(curve.scalar_mult(scalar))
 
-        return cls(seed, scalar, public_bytes)
-
+        return cls(seed, scalar, prefix, public_bytes)
     @classmethod
     def generate(cls) -> Keypair:
         """Generate a fresh Ed448 keypair from a random 57-byte seed."""
