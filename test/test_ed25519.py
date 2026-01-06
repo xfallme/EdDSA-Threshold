@@ -26,7 +26,7 @@ def test_ed25519_signature(lines, request):
         assert (s+m) == sm, "Generated signature does not match expected signature"
 
         # Verify the signature
-        is_valid = Ed25519.verify(s, m, keypair.public_bytes())
+        is_valid = Ed25519.verify(s, m, keypair.public_bytes)
         assert is_valid, "Signature verification failed"
 
 
@@ -40,7 +40,7 @@ def test_ed25519ctx_signature(lines, request):
         sk = binascii.unhexlify(x[0])
         keypair = Ed25519Keypair.from_private_bytes(sk)
         pk = binascii.unhexlify(x[1])
-        assert keypair.public_bytes() == pk, "Derived public key does not match expected public key"
+        assert keypair.public_bytes == pk, "Derived public key does not match expected public key"
 
         m = binascii.unhexlify(x[2])
         ctx = binascii.unhexlify(x[3])
@@ -51,7 +51,7 @@ def test_ed25519ctx_signature(lines, request):
         assert generated_s == s, "Generated signature does not match expected signature"
 
         # Verify the signature
-        is_valid = Ed25519CTX.verify(s, m, keypair.public_bytes(), ctx)
+        is_valid = Ed25519CTX.verify(s, m, keypair.public_bytes, ctx)
         assert is_valid, "Signature verification failed"
 
 
@@ -65,7 +65,7 @@ def test_ed25519ph_signature(lines, request):
         sk = binascii.unhexlify(x[0])
         keypair = Ed25519Keypair.from_private_bytes(sk)
         pk = binascii.unhexlify(x[1])
-        assert keypair.public_bytes() == pk, "Derived public key does not match expected public key"
+        assert keypair.public_bytes == pk, "Derived public key does not match expected public key"
 
         m = binascii.unhexlify(x[2])
         ctx = binascii.unhexlify(x[3])
@@ -76,5 +76,5 @@ def test_ed25519ph_signature(lines, request):
         assert generated_s == s, "Generated signature does not match expected signature"
 
         # Verify the signature
-        is_valid = Ed25519PH.verify(s, m, keypair.public_bytes(), ctx)
+        is_valid = Ed25519PH.verify(s, m, keypair.public_bytes, ctx)
         assert is_valid, "Signature verification failed"

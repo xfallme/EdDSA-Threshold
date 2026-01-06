@@ -17,7 +17,7 @@ def test_ed448_signature(lines, request):
         sk = binascii.unhexlify(x[0])
         keypair = Ed448Keypair.from_private_bytes(sk)
         pk = binascii.unhexlify(x[1])
-        assert keypair.public_bytes() == pk, "Derived public key does not match expected public key"
+        assert keypair.public_bytes == pk, "Derived public key does not match expected public key"
 
         m = binascii.unhexlify(x[2])
         ctx = binascii.unhexlify(x[3])
@@ -28,7 +28,7 @@ def test_ed448_signature(lines, request):
         assert generated_s == s, "Generated signature does not match expected signature"
 
         # Verify the signature
-        is_valid = Ed448.verify(s, m, keypair.public_bytes(), ctx)
+        is_valid = Ed448.verify(s, m, keypair.public_bytes, ctx)
         assert is_valid, "Signature verification failed"
 
 
@@ -42,7 +42,7 @@ def test_ed448ph_signature(lines, request):
         sk = binascii.unhexlify(x[0])
         keypair = Ed448Keypair.from_private_bytes(sk)
         pk = binascii.unhexlify(x[1])
-        assert keypair.public_bytes() == pk, "Derived public key does not match expected public key"
+        assert keypair.public_bytes == pk, "Derived public key does not match expected public key"
 
         m = binascii.unhexlify(x[2])
         ctx = binascii.unhexlify(x[3])
@@ -53,5 +53,5 @@ def test_ed448ph_signature(lines, request):
         assert generated_s == s, "Generated signature does not match expected signature"
 
         # Verify the signature
-        is_valid = Ed448PH.verify(s, m, keypair.public_bytes(), ctx)
+        is_valid = Ed448PH.verify(s, m, keypair.public_bytes, ctx)
         assert is_valid, "Signature verification failed"

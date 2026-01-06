@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 class Keypair(ABC):
     """
     Abstract base class for EdDSA keypairs.
-    Provides access to private seed, scalar, and public key bytes.
+    Provides access to private seed, scalar, prefix and public key bytes.
 
     Also defines abstract methods for keypair generation.
     These allow for keypair creation from a private seed or generation of a fresh random keypair.
@@ -17,18 +17,22 @@ class Keypair(ABC):
         self._prefix = prefix
         self._public_bytes = public_bytes
 
+    @property
     def private_bytes(self) -> bytes:
         """Return the private seed bytes used to generate the keypair."""
         return self._private_bytes
 
+    @property
     def scalar(self) -> int:
         """Return the integer scalar derived from the private seed."""
         return self._scalar
     
+    @property
     def prefix(self) -> bytes:
         """Return the prefix bytes derived from the private seed."""
         return self._prefix
 
+    @property
     def public_bytes(self) -> bytes:
         """Return the public key bytes corresponding to the keypair."""
         return self._public_bytes

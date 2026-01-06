@@ -33,7 +33,7 @@ class Ed448():
 
         # Sign message according to RFC 8032 Section 5.2.6
         # 1. Get precomputed prefix
-        prefix = keypair.prefix()
+        prefix = keypair.prefix
 
         # 2. Compute the nonce
         r = int.from_bytes(shake256(dom4 + prefix + ph(message), 114), byteorder='little')
@@ -43,11 +43,11 @@ class Ed448():
         R = curve.encode_extended_point(curve.scalar_mult(r))
 
         # 4. Compute the challenge
-        k = int.from_bytes(shake256(dom4 + R + keypair.public_bytes() + ph(message), 114), byteorder='little')
+        k = int.from_bytes(shake256(dom4 + R + keypair.public_bytes + ph(message), 114), byteorder='little')
 
         # 5. Compute the S value
         k = scalar_ops.reduce(k)
-        S = scalar_ops.reduce(r + k * keypair.scalar())
+        S = scalar_ops.reduce(r + k * keypair.scalar)
 
         return R + S.to_bytes(57, byteorder='little')
 
