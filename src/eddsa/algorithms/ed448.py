@@ -1,7 +1,7 @@
 from typing import Callable
 from eddsa.curves.ed448.ed448_curve import Ed448Curve
 from eddsa.curves.ed448.scalar_ops import Ed448ScalarOps
-from eddsa.keys.keypair import Keypair
+from eddsa.keys.ed448_keypair import Ed448Keypair
 from eddsa.util.dom import dom4
 from eddsa.util.hash_bindings import shake256
 
@@ -13,7 +13,7 @@ class Ed448():
     """
 
     @staticmethod
-    def sign(message: bytes, keypair: Keypair, context: bytes) -> bytes:
+    def sign(message: bytes, keypair: Ed448Keypair, context: bytes) -> bytes:
         """Sign a message using the provided Ed448 keypair."""
 
         return Ed448._sign(message, keypair, ph=lambda m: m, dom4=dom4(0, context))
@@ -25,7 +25,7 @@ class Ed448():
         return Ed448._verify(signature, message, public_key, ph=lambda m: m, dom4=dom4(0, context))
 
     @staticmethod
-    def _sign(message: bytes, keypair: Keypair, ph: Callable, dom4: bytes) -> bytes:
+    def _sign(message: bytes, keypair: Ed448Keypair, ph: Callable, dom4: bytes) -> bytes:
         """Internal sign method as basis for subclasses."""
 
         curve = Ed448Curve()

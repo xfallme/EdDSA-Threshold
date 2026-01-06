@@ -13,7 +13,7 @@ class Ed25519Keypair(Keypair):
     """
 
     @classmethod
-    def from_private_bytes(cls, seed: bytes) -> Keypair:
+    def from_private_bytes(cls, seed: bytes) -> Ed25519Keypair:
         """Create Ed25519 keypair from 32-byte seed."""
         if len(seed) != SEED_SIZE:
             raise ValueError(f"Invalid seed size: {len(seed)} bytes (expected {SEED_SIZE} bytes)")
@@ -41,6 +41,6 @@ class Ed25519Keypair(Keypair):
         return cls(seed, scalar, prefix, public_bytes)
 
     @classmethod
-    def generate(cls) -> Keypair:
+    def generate(cls) -> Ed25519Keypair:
         """Generate a fresh Ed25519 keypair from a random 32-byte seed."""
         return cls.from_private_bytes(os.urandom(SEED_SIZE))

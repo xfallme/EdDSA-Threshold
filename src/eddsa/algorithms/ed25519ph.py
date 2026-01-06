@@ -1,5 +1,5 @@
 from eddsa.algorithms.ed25519 import Ed25519
-from eddsa.keys.keypair import Keypair
+from eddsa.keys.ed25519_keypair import Ed25519Keypair
 from eddsa.util.dom import dom2
 from eddsa.util.hash_bindings import sha512
 
@@ -11,7 +11,7 @@ class Ed25519PH(Ed25519):
     """
 
     @staticmethod
-    def sign(message: bytes, keypair: Keypair, context: bytes = b"") -> bytes:
+    def sign(message: bytes, keypair: Ed25519Keypair, context: bytes = b"") -> bytes:
         """Sign a message using the provided Ed25519 keypair. Uses pre-hashing and context (set to empty by default)."""
 
         return Ed25519PH._sign(message, keypair, ph=sha512, dom2=dom2(1, context))
