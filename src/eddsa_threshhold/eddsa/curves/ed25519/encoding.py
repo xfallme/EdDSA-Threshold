@@ -1,16 +1,16 @@
 from typing import Tuple
 
-from eddsa.curves.base.encoding import Encoding
-from eddsa.curves.ed448.field_ops import Ed448FieldOps
+from eddsa_threshhold.eddsa.curves.base.encoding import Encoding
+from eddsa_threshhold.eddsa.curves.ed25519.field_ops import Ed25519FieldOps
 from .constants import SCALAR_SIZE, PUBLIC_KEY_SIZE, d, a
 
 
-class Ed448Encoding(Encoding):
+class Ed25519Encoding(Encoding):
     """
-    Byte encoding/decoding layer for Ed448.
+    Byte encoding/decoding layer for Ed25519.
     """
 
-    def __init__(self, field_ops: Ed448FieldOps):
+    def __init__(self, field_ops: Ed25519FieldOps):
         self._field = field_ops
 
     @property
@@ -51,14 +51,17 @@ class Ed448Encoding(Encoding):
         u = (y2 - 1) % self._field.p
         v = (d * y2 - a) % self._field.p
         
-        u3 = self._field.pow(u, 3)
         v3 = self._field.pow(v, 3)
-        u5 = self._field.pow(u, 5)
+        v7 = self._field.pow(v, 7)
         
-        w = (u3 * v * self._field.pow((u5 * v3), ((self._field.p - 3) // 4))) % self._field.p
+        w = (u * v3 * self._field.pow((u * v7), ((self._field.p - 5) // 8))) % self._field.p
         
-        if (v * w**2) % self._field.p == u:
+        w2 = self._field.sqr(w)
+        
+        if (v * w2) % self._field.p == u:
             x = w
+        elif (v * w2) % self._field.p == self._field.neg(u):
+            x = (w * self._field.pow(2, ((self._field.p - 1) // 4))) % self._field.p
         else:
             raise ValueError("Invalid point encoding - SQRT failure")
         

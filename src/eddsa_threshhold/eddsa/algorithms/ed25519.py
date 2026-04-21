@@ -1,9 +1,9 @@
 from typing import Callable
-from eddsa.curves.ed25519.ed25519_curve import Ed25519Curve
-from eddsa.curves.ed25519.scalar_ops import Ed25519ScalarOps
-from eddsa.keys.ed25519_keypair import Ed25519Keypair
-from eddsa.util.dom import dom2
-from eddsa.util.hash_bindings import sha512
+from eddsa_threshhold.eddsa.curves.ed25519.ed25519_curve import Ed25519Curve
+from eddsa_threshhold.eddsa.curves.ed25519.scalar_ops import Ed25519ScalarOps
+from eddsa_threshhold.eddsa.keys.ed25519_keypair import Ed25519Keypair
+from eddsa_threshhold.eddsa.util.dom import dom2
+from eddsa_threshhold.eddsa.util.hash_bindings import sha512
 
 
 class Ed25519():

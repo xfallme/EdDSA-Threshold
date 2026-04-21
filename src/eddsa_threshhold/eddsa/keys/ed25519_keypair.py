@@ -1,8 +1,8 @@
 import os
-from eddsa.curves.ed25519.ed25519_curve import Ed25519Curve
-from eddsa.keys.keypair import Keypair
-from eddsa.curves.ed25519.constants import SEED_SIZE
-from eddsa.util.hash_bindings import sha512
+from eddsa_threshhold.eddsa.curves.ed25519.ed25519_curve import Ed25519Curve
+from eddsa_threshhold.eddsa.keys.keypair import Keypair
+from eddsa_threshhold.eddsa.curves.ed25519.constants import SEED_SIZE
+from eddsa_threshhold.eddsa.util.hash_bindings import sha512
 
 
 class Ed25519Keypair(Keypair):

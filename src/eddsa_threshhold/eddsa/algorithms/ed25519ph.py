@@ -1,7 +1,7 @@
-from eddsa.algorithms.ed25519 import Ed25519
-from eddsa.keys.ed25519_keypair import Ed25519Keypair
-from eddsa.util.dom import dom2
-from eddsa.util.hash_bindings import sha512
+from eddsa_threshhold.eddsa.algorithms.ed25519 import Ed25519
+from eddsa_threshhold.eddsa.keys.ed25519_keypair import Ed25519Keypair
+from eddsa_threshhold.eddsa.util.dom import dom2
+from eddsa_threshhold.eddsa.util.hash_bindings import sha512
 
 
 class Ed25519PH(Ed25519):

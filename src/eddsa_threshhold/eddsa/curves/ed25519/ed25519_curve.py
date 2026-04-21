@@ -1,5 +1,5 @@
 from typing import Tuple
-from eddsa.curves.base.edwards_curve import EdwardsCurve
+from eddsa_threshhold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from .encoding import Ed25519Encoding
 from .field_ops import Ed25519FieldOps
 from .constants import d, BASE

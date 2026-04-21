@@ -1,8 +1,8 @@
 import os
-from eddsa.curves.ed448.ed448_curve import Ed448Curve
-from eddsa.keys.keypair import Keypair
-from eddsa.curves.ed448.constants import SEED_SIZE
-from eddsa.util.hash_bindings import shake256
+from eddsa_threshhold.eddsa.curves.ed448.ed448_curve import Ed448Curve
+from eddsa_threshhold.eddsa.keys.keypair import Keypair
+from eddsa_threshhold.eddsa.curves.ed448.constants import SEED_SIZE
+from eddsa_threshhold.eddsa.util.hash_bindings import shake256
 
 
 class Ed448Keypair(Keypair):

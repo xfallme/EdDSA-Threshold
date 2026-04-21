@@ -1,9 +1,9 @@
 from typing import Callable
-from eddsa.curves.ed448.ed448_curve import Ed448Curve
-from eddsa.curves.ed448.scalar_ops import Ed448ScalarOps
-from eddsa.keys.ed448_keypair import Ed448Keypair
-from eddsa.util.dom import dom4
-from eddsa.util.hash_bindings import shake256
+from eddsa_threshhold.eddsa.curves.ed448.ed448_curve import Ed448Curve
+from eddsa_threshhold.eddsa.curves.ed448.scalar_ops import Ed448ScalarOps
+from eddsa_threshhold.eddsa.keys.ed448_keypair import Ed448Keypair
+from eddsa_threshhold.eddsa.util.dom import dom4
+from eddsa_threshhold.eddsa.util.hash_bindings import shake256
 
 
 class Ed448():

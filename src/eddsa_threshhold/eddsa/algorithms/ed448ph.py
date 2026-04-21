@@ -1,7 +1,7 @@
-from eddsa.algorithms.ed448 import Ed448
-from eddsa.keys.ed448_keypair import Ed448Keypair
-from eddsa.util.dom import dom4
-from eddsa.util.hash_bindings import shake256
+from eddsa_threshhold.eddsa.algorithms.ed448 import Ed448
+from eddsa_threshhold.eddsa.keys.ed448_keypair import Ed448Keypair
+from eddsa_threshhold.eddsa.util.dom import dom4
+from eddsa_threshhold.eddsa.util.hash_bindings import shake256
 
 
 class Ed448PH(Ed448):

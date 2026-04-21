@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
 
-from eddsa.curves.base.field_ops import FieldOps
+from eddsa_threshhold.eddsa.curves.base.field_ops import FieldOps
 
 
 class Encoding(ABC):

@@ -1,4 +1,4 @@
-from eddsa.curves.base.scalar_ops import ScalarOps
+from eddsa_threshhold.eddsa.curves.base.scalar_ops import ScalarOps
 from .constants import L
 
 

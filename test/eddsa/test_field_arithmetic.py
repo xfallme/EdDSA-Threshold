@@ -1,6 +1,6 @@
 from pytest_cases import parametrize_with_cases
 
-from eddsa.curves.base.field_ops import FieldOps
+from eddsa_threshhold.eddsa.curves.base.field_ops import FieldOps
 
 
 @parametrize_with_cases("field", cases="test_cases_fields")
