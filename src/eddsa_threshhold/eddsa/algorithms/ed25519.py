@@ -1,6 +1,7 @@
 from typing import Callable
 from eddsa_threshhold.eddsa.curves.ed25519.ed25519_curve import Ed25519Curve
 from eddsa_threshhold.eddsa.curves.ed25519.scalar_ops import Ed25519ScalarOps
+from eddsa_threshhold.eddsa.curves.ed25519.constants import SCALAR_SIZE
 from eddsa_threshhold.eddsa.keys.ed25519_keypair import Ed25519Keypair
 from eddsa_threshhold.eddsa.util.dom import dom2
 from eddsa_threshhold.eddsa.util.hash_bindings import sha512
@@ -17,11 +18,11 @@ class Ed25519():
         """Sign a message using the provided Ed25519 keypair."""
 
         return Ed25519._sign(message, keypair, ph=lambda m: m, dom2=dom2(0, None))
-    
+
     @staticmethod
     def verify(signature: bytes, message: bytes, public_key: bytes) -> bool:
         """Verify a signature for a message using the provided Ed25519 public key."""
-        
+
         return Ed25519._verify(signature, message, public_key, ph=lambda m: m, dom2=dom2(0, None))
 
     @staticmethod
@@ -49,7 +50,7 @@ class Ed25519():
         k = scalar_ops.reduce(k)
         S = scalar_ops.reduce(r + k * keypair.scalar)
 
-        return R + S.to_bytes(32, byteorder='little')
+        return R + S.to_bytes(SCALAR_SIZE, byteorder='little')
 
     @staticmethod
     def _verify(signature: bytes, message: bytes, public_key: bytes, ph: Callable, dom2: bytes) -> bool:
@@ -64,15 +65,15 @@ class Ed25519():
 
         try:
             # 1. Decode R and S from the signature
-            R = curve.decode_point(signature[:32])
-            S = int.from_bytes(signature[32:], byteorder='little')
+            R = curve.decode_point(signature[:SCALAR_SIZE])
+            S = int.from_bytes(signature[SCALAR_SIZE:], byteorder='little')
             if S >= scalar_ops.order or S < 0:
                 return False
 
             A = curve.decode_point(public_key)
 
             # 2. Compute the challenge
-            k = int.from_bytes(sha512(dom2 + signature[:32] + public_key + ph(message)), byteorder='little')
+            k = int.from_bytes(sha512(dom2 + signature[:SCALAR_SIZE] + public_key + ph(message)), byteorder='little')
             k = scalar_ops.reduce(k)
 
             # 3. Verify the equation [S]B = R + [k]A
