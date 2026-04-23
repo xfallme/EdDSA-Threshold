@@ -39,7 +39,7 @@ class ShamirSecretSharing(SecretSharing):
 
         secret = 0
         for i, share_i in enumerate(shares):
-            # Compute the Lagrange basis polynomial L_j(0)
+            # Compute the Lagrange basis polynomial for share_i
             numerator = 1
             denominator = 1
             for j, share_j in enumerate(shares):
@@ -47,7 +47,7 @@ class ShamirSecretSharing(SecretSharing):
                     numerator = self.scalar_ops.mul(numerator, -share_j.index)
                     denominator = self.scalar_ops.mul(denominator, share_i.index - share_j.index)
 
-            # L_j(0) = numerator / denominator mod order
+            # Add share_i contribution to the secret
             lagrange_coeff = self.scalar_ops.mul(numerator, self.scalar_ops.inv(denominator))
             secret = self.scalar_ops.add(secret, self.scalar_ops.mul(share_i.value, lagrange_coeff))
 
