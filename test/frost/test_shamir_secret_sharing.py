@@ -4,7 +4,7 @@ import pytest
 from pytest_cases import parametrize_with_cases
 
 from eddsa_threshhold.eddsa.curves.base.scalar_ops import ScalarOps
-from eddsa_threshhold.frost.secrets.shamir_secret_sharing import ShamirSecretSharing
+from eddsa_threshhold.frost.core.secrets.shamir_secret_sharing import ShamirSecretSharing
 
 
 @parametrize_with_cases("scalar_ops", cases="test_cases_scalars")
