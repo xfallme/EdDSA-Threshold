@@ -1,4 +1,5 @@
 from eddsa_threshhold.eddsa.curves.base.scalar_ops import ScalarOps
+from eddsa_threshhold.frost.core.polynomial import evaluate_polynomial, derive_interpolating_value
 from eddsa_threshhold.frost.core.secrets.secret_sharing import SecretSharing
 from eddsa_threshhold.frost.core.types.secrets import SecretShare
 
@@ -20,12 +21,8 @@ class ShamirSecretSharing(SecretSharing):
         coeffs = [secret] + [self.scalar_ops.random_scalar() for _ in range(1, self.t)]
 
         shares = []
-        for i in range(1, self.n + 1):
-            # Evaluate f(i) to get the share value
-            secret_key_share_i = 0
-            for coeff in reversed(coeffs):
-                secret_key_share_i *= i
-                secret_key_share_i = self.scalar_ops.add(secret_key_share_i, coeff)
+        for i in range(self.n, 0, -1):
+            secret_key_share_i = evaluate_polynomial(coeffs, i, self.scalar_ops)
             shares.append(SecretShare(index=i, value=secret_key_share_i))
 
         return shares
@@ -39,17 +36,9 @@ class ShamirSecretSharing(SecretSharing):
             raise ValueError("Not enough shares to reconstruct the secret")
 
         secret = 0
-        for i, share_i in enumerate(shares):
-            # Compute the Lagrange basis polynomial for share_i
-            numerator = 1
-            denominator = 1
-            for j, share_j in enumerate(shares):
-                if j != i:
-                    numerator = self.scalar_ops.mul(numerator, -share_j.index)
-                    denominator = self.scalar_ops.mul(denominator, share_i.index - share_j.index)
-
+        for share_i in shares:
             # Add share_i contribution to the secret
-            lagrange_coeff = self.scalar_ops.mul(numerator, self.scalar_ops.inv(denominator))
+            lagrange_coeff = derive_interpolating_value([share_j.index for share_j in shares], share_i.index, 0, self.scalar_ops)
             secret = self.scalar_ops.add(secret, self.scalar_ops.mul(share_i.value, lagrange_coeff))
 
         return secret
