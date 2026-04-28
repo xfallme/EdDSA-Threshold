@@ -50,7 +50,7 @@ class Ed448():
         k = scalar_ops.reduce(k)
         S = scalar_ops.reduce(r + k * keypair.scalar)
 
-        return R + S.to_bytes(SCALAR_SIZE, byteorder='little')
+        return R + scalar_ops.serialize(S)
 
     @staticmethod
     def _verify(signature: bytes, message: bytes, public_key: bytes, ph: Callable, dom4: bytes) -> bool:
@@ -66,7 +66,7 @@ class Ed448():
         try:
             # 1. Decode R and S from the signature
             R = curve.decode_point(signature[:SCALAR_SIZE])
-            S = int.from_bytes(signature[SCALAR_SIZE:], byteorder='little')
+            S = scalar_ops.deserialize(signature[SCALAR_SIZE:])
             if S >= scalar_ops.order or S < 0:
                 return False
 
