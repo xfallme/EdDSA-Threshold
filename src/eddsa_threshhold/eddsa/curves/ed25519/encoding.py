@@ -2,7 +2,7 @@ from typing import Tuple
 
 from eddsa_threshhold.eddsa.curves.base.encoding import Encoding
 from eddsa_threshhold.eddsa.curves.ed25519.field_ops import Ed25519FieldOps
-from .constants import SCALAR_SIZE, PUBLIC_KEY_SIZE, d, a
+from .constants import SCALAR_SIZE, PUBLIC_KEY_SIZE, d, a, L
 
 
 class Ed25519Encoding(Encoding):
@@ -17,6 +17,11 @@ class Ed25519Encoding(Encoding):
     def scalar_size(self) -> int:
         """Size in bytes of a private scalar."""
         return SCALAR_SIZE
+    
+    @property
+    def group_order(self) -> int:
+        """Group order of the field."""
+        return L
 
     @property
     def point_size(self) -> int:

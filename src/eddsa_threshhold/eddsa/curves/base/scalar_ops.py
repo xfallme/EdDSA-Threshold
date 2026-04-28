@@ -6,17 +6,12 @@ class ScalarOps(ABC):
     """
     Abstract class representing scalar-related math modulo the group order.
     
-    All operations return integers representing field elements.
+    All operations return integers representing scalars.
     """
 
     @property
     @abstractmethod
     def order(self) -> int:
-        raise NotImplementedError
-    
-    @property
-    @abstractmethod
-    def scalar_size(self) -> int:
         raise NotImplementedError
 
     def add(self, x: int, y: int) -> int:
@@ -55,16 +50,3 @@ class ScalarOps(ABC):
     def random_scalar(self) -> int:
         """Fine for this project; NOT PRODUCTION SECURE."""
         return randbelow(self.order)
-    
-    def serialize(self, x: int) -> bytes:
-        """Serialize a scalar to bytes (little-endian)."""
-        return x.to_bytes(self.scalar_size, byteorder='little')
-    
-    def deserialize(self, data: bytes) -> int:
-        """Deserialize bytes to a scalar (little-endian)."""
-        if len(data) != self.scalar_size:
-            raise ValueError(f"Invalid scalar size: expected {self.scalar_size} bytes")
-        value = int.from_bytes(data, byteorder='little')
-        if value < 0 or value >= self.order:
-            raise ValueError("Deserialized scalar is out of range")
-        return value
