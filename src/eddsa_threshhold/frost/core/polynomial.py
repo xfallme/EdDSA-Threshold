@@ -9,7 +9,7 @@ def evaluate_polynomial(coeffs: list[int], x: int, scalar_ops: ScalarOps) -> int
     result = 0
     for coeff in reversed(coeffs):
         result = result * x + coeff
-        
+
     return scalar_ops.reduce(result)
 
 
@@ -17,7 +17,7 @@ def derive_interpolating_value(L: list[int], x_i: int, x: int, scalar_ops: Scala
     """
     Compute Lagrange basis coefficient λ_i(x) for arbitrary interpolation point x.
     """
-    
+
     if x_i not in L:
         raise ValueError("x_i not in set")
 
@@ -26,7 +26,7 @@ def derive_interpolating_value(L: list[int], x_i: int, x: int, scalar_ops: Scala
 
     numerator = 1
     denominator = 1
-    
+
     # Compute the Lagrange basis polynomial
     # https://en.wikipedia.org/wiki/Lagrange_polynomial
     for x_j in L:
@@ -36,6 +36,3 @@ def derive_interpolating_value(L: list[int], x_i: int, x: int, scalar_ops: Scala
         denominator = scalar_ops.mul(denominator, scalar_ops.sub(x_i, x_j))
 
     return scalar_ops.mul(numerator, scalar_ops.inv(denominator))
-
-
-

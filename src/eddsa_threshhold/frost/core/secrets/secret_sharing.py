@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from eddsa_threshhold.eddsa.curves.base.scalar_ops import ScalarOps
-from eddsa_threshhold.frost.core.types.secrets import SecretShare
+from eddsa_threshhold.frost.core.types import SecretShare
 
 
 class SecretSharing(ABC):

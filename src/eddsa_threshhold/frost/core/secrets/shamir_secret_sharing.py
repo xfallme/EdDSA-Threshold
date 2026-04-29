@@ -1,7 +1,7 @@
 from eddsa_threshhold.eddsa.curves.base.scalar_ops import ScalarOps
 from eddsa_threshhold.frost.core.polynomial import evaluate_polynomial, derive_interpolating_value
 from eddsa_threshhold.frost.core.secrets.secret_sharing import SecretSharing
-from eddsa_threshhold.frost.core.types.secrets import SecretShare
+from eddsa_threshhold.frost.core.types import SecretShare
 
 
 class ShamirSecretSharing(SecretSharing):
