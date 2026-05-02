@@ -1,6 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
 
+from eddsa_threshhold.eddsa.curves.base.encoding import Encoding
+from eddsa_threshhold.eddsa.curves.base.field_ops import FieldOps
+from eddsa_threshhold.eddsa.curves.base.scalar_ops import ScalarOps
+
 
 class EdwardsCurve(ABC):
     """
@@ -13,19 +17,25 @@ class EdwardsCurve(ABC):
 
     @property
     @abstractmethod
-    def field(self):
+    def field(self) -> FieldOps:
         """Return the FieldOps implementation."""
         raise NotImplementedError
 
     @property
     @abstractmethod
-    def encoding(self):
+    def encoding(self) -> Encoding:
         """Return the Encoding implementation."""
+        raise NotImplementedError
+    
+    @property
+    @abstractmethod
+    def scalar_ops(self) -> ScalarOps:
+        """Return the ScalarOps implementation."""
         raise NotImplementedError
 
     @property
     @abstractmethod
-    def base_point(self):
+    def base_point(self) -> Tuple:
         """Return affine base point as (x, y)."""
         raise NotImplementedError
 

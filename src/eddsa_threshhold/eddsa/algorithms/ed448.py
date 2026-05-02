@@ -30,7 +30,6 @@ class Ed448():
         """Internal sign method as basis for subclasses."""
 
         curve = Ed448Curve()
-        scalar_ops = Ed448ScalarOps()
 
         # Sign message according to RFC 8032 Section 5.2.6
         # 1. Get precomputed prefix
@@ -40,15 +39,15 @@ class Ed448():
         r = int.from_bytes(shake256(dom4 + prefix + ph(message), 114), byteorder='little')
 
         # 3. Compute the R point
-        r = scalar_ops.reduce(r)
+        r = curve.scalar_ops.reduce(r)
         R = curve.encode_extended_point(curve.scalar_mult(r))
 
         # 4. Compute the challenge
         k = int.from_bytes(shake256(dom4 + R + keypair.public_bytes + ph(message), 114), byteorder='little')
 
         # 5. Compute the S value
-        k = scalar_ops.reduce(k)
-        S = scalar_ops.reduce(r + k * keypair.scalar)
+        k = curve.scalar_ops.reduce(k)
+        S = curve.scalar_ops.reduce(r + k * keypair.scalar)
 
         return R + curve._encoding.encode_scalar(S)
 
@@ -57,7 +56,6 @@ class Ed448():
         """Internal verify method as basis for subclasses."""
 
         curve = Ed448Curve()
-        scalar_ops = Ed448ScalarOps()
 
         # Verify signature according to RFC 8032 Section 5.2.7
         if len(signature) != SIGNATURE_SIZE:
@@ -67,14 +65,14 @@ class Ed448():
             # 1. Decode R and S from the signature
             R = curve.decode_point(signature[:SCALAR_SIZE])
             S = curve._encoding.decode_scalar(signature[SCALAR_SIZE:])
-            if S >= scalar_ops.order or S < 0:
+            if S >= curve.scalar_ops.order or S < 0:
                 return False
 
             A = curve.decode_point(public_key)
 
             # 2. Compute the challenge
             k = int.from_bytes(shake256(dom4 + signature[:SCALAR_SIZE] + public_key + ph(message), 114), byteorder='little')
-            k = scalar_ops.reduce(k)
+            k = curve.scalar_ops.reduce(k)
 
             # 3. Verify the equation [S]B = R + [k]A
             left = curve.scalar_mult(S)

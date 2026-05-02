@@ -1,5 +1,9 @@
 from typing import Tuple
 from eddsa_threshhold.eddsa.curves.base.edwards_curve import EdwardsCurve
+from eddsa_threshhold.eddsa.curves.base.encoding import Encoding
+from eddsa_threshhold.eddsa.curves.base.field_ops import FieldOps
+from eddsa_threshhold.eddsa.curves.base.scalar_ops import ScalarOps
+from .scalar_ops import Ed448ScalarOps
 from .encoding import Ed448Encoding
 from .field_ops import Ed448FieldOps
 from .constants import d, BASE
@@ -13,17 +17,22 @@ class Ed448Curve(EdwardsCurve):
     """
 
     def __init__(self):
-        self._field = Ed448FieldOps()
-        self._encoding = Ed448Encoding(self._field)
+        self._field_ops = Ed448FieldOps()
+        self._encoding = Ed448Encoding(self._field_ops)
+        self._scalar_ops = Ed448ScalarOps()
         self.d = d
 
     @property
-    def field(self):
-        return self._field
+    def field(self) -> FieldOps:
+        return self._field_ops
 
     @property
-    def encoding(self):
+    def encoding(self) -> Encoding:
         return self._encoding
+
+    @property
+    def scalar_ops(self) -> ScalarOps:
+        return self._scalar_ops
 
     @property
     def base_point(self):
@@ -43,9 +52,9 @@ class Ed448Curve(EdwardsCurve):
         G = B + E
         H = (Y1 + X1) * (Y2 + X2)
 
-        X3 = self._field.mul(A, F*(H - C - D))
-        Y3 = self._field.mul(A, G*(D - C))
-        Z3 = self._field.mul(F, G)
+        X3 = self._field_ops.mul(A, F*(H - C - D))
+        Y3 = self._field_ops.mul(A, G*(D - C))
+        Z3 = self._field_ops.mul(F, G)
 
         return (X3, Y3, Z3, _)
 
@@ -60,8 +69,8 @@ class Ed448Curve(EdwardsCurve):
         H = Z1**2
         J = E - 2 * H
 
-        X3 = self._field.mul((B - E), J)
-        Y3 = self._field.mul(E, (C - D))
-        Z3 = self._field.mul(E, J)
+        X3 = self._field_ops.mul((B - E), J)
+        Y3 = self._field_ops.mul(E, (C - D))
+        Z3 = self._field_ops.mul(E, J)
 
         return (X3, Y3, Z3, _)

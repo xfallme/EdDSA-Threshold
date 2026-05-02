@@ -1,5 +1,9 @@
 from typing import Tuple
 from eddsa_threshhold.eddsa.curves.base.edwards_curve import EdwardsCurve
+from eddsa_threshhold.eddsa.curves.base.encoding import Encoding
+from eddsa_threshhold.eddsa.curves.base.field_ops import FieldOps
+from eddsa_threshhold.eddsa.curves.base.scalar_ops import ScalarOps
+from .scalar_ops import Ed25519ScalarOps
 from .encoding import Ed25519Encoding
 from .field_ops import Ed25519FieldOps
 from .constants import d, BASE
@@ -13,20 +17,25 @@ class Ed25519Curve(EdwardsCurve):
     """
 
     def __init__(self):
-        self._field = Ed25519FieldOps()
-        self._encoding = Ed25519Encoding(self._field)
+        self._field_ops = Ed25519FieldOps()
+        self._encoding = Ed25519Encoding(self._field_ops)
+        self._scalar_ops = Ed25519ScalarOps()
         self.d = d
 
     @property
-    def field(self):
-        return self._field
+    def field(self) -> FieldOps:
+        return self._field_ops
 
     @property
-    def encoding(self):
+    def encoding(self) -> Encoding:
         return self._encoding
 
     @property
-    def base_point(self):
+    def scalar_ops(self) -> ScalarOps:
+        return self._scalar_ops
+
+    @property
+    def base_point(self) -> Tuple:
         return BASE
 
     # Point addition
@@ -43,10 +52,10 @@ class Ed25519Curve(EdwardsCurve):
         G = D + C
         H = B + A
 
-        X3 = self._field.mul(E, F)
-        Y3 = self._field.mul(G, H)
-        T3 = self._field.mul(E, H)
-        Z3 = self._field.mul(F, G)
+        X3 = self._field_ops.mul(E, F)
+        Y3 = self._field_ops.mul(G, H)
+        T3 = self._field_ops.mul(E, H)
+        Z3 = self._field_ops.mul(F, G)
 
         return (X3, Y3, Z3, T3)
 
@@ -62,9 +71,9 @@ class Ed25519Curve(EdwardsCurve):
         G = A - B
         F = C + G
 
-        X3 = self._field.mul(E, F)
-        Y3 = self._field.mul(G, H)
-        T3 = self._field.mul(E, H)
-        Z3 = self._field.mul(F, G)
+        X3 = self._field_ops.mul(E, F)
+        Y3 = self._field_ops.mul(G, H)
+        T3 = self._field_ops.mul(E, H)
+        Z3 = self._field_ops.mul(F, G)
 
         return (X3, Y3, Z3, T3)
