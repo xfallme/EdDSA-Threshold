@@ -67,7 +67,7 @@ def compute_group_commitment(commitments: list[NonceCommitment], binding_factors
     """
     Computes the group commitment from a list of NonceCommitments and BindingFactors.
     """
-    group_commitment = curve.base_point()
+    group_commitment = curve.base_point
 
     for commitment in commitments:
         binding_factor = binding_factor_for_participant(commitment.participant_id, binding_factors)
