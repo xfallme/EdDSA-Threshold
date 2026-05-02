@@ -46,8 +46,10 @@ class FrostParticipant:
         return signature_share
 
     def _commit(self) -> NonceCommitment:
-        hiding_nonce = generate_nonce(self.curve.encoding.encode_scalar(self.secret_share.value), self.hashing)
-        binding_nonce = generate_nonce(self.curve.encoding.encode_scalar(self.secret_share.value), self.hashing)
+        encoded_secret_share = self.curve.encoding.encode_scalar(self.secret_share.value)
+        hiding_nonce = generate_nonce(encoded_secret_share, self.hashing)
+        binding_nonce = generate_nonce(encoded_secret_share, self.hashing)
+        
         hiding_nonce_commitment = self.curve.scalar_mult(hiding_nonce, self.curve.base_point)
         binding_nonce_commitment = self.curve.scalar_mult(binding_nonce, self.curve.base_point)
 
@@ -59,8 +61,7 @@ class FrostParticipant:
         if self._nonce_pair is None:
             raise ValueError("participant must commit before signing")
 
-        binding_factors = compute_binding_factors(
-            self.group_info.group_public_key, commitments, message, self.hashing, self.curve.encoding)
+        binding_factors = compute_binding_factors(self.group_info.group_public_key, commitments, message, self.hashing, self.curve.encoding)
         binding_factor = binding_factor_for_participant(self.participant_id, binding_factors)
 
         group_commitment = compute_group_commitment(commitments, binding_factors, self.curve)
@@ -69,11 +70,9 @@ class FrostParticipant:
         # Potentially implemenet reuse logic
         lambda_i = derive_interpolating_value(participants, self.participant_id, 0, self.curve.scalar_ops)
 
-        challenge = compute_challenge(group_commitment, self.group_info.group_public_key,
-                                      message, self.hashing, self.curve.encoding)
+        challenge = compute_challenge(group_commitment, self.group_info.group_public_key, message, self.hashing, self.curve.encoding)
 
         hiding_nonce, binding_nonce = self._nonce_pair
-        signature_share = hiding_nonce + (binding_nonce * binding_factor) + \
-            (lambda_i * self.secret_share.value * challenge)
+        signature_share = hiding_nonce + (binding_nonce * binding_factor) + (lambda_i * self.secret_share.value * challenge)
 
         return self.curve.scalar_ops.reduce(signature_share)
