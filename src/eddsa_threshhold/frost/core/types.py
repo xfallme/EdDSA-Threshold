@@ -1,8 +1,20 @@
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Tuple
 
 ParticipantId = int
 SessionId = str
+
+
+@dataclass(frozen=True)
+class SecretShare:
+    index: ParticipantId  # x-coordinate
+    value: int  # y = f(x) mod n
+
+
+@dataclass(frozen=True)
+class GroupInfo:
+    group_public_key: bytes
+    public_keys: dict[ParticipantId, Tuple]
 
 
 @dataclass(frozen=True)
@@ -16,12 +28,6 @@ class NonceCommitment:
 class BindingFactor:
     participant_id: ParticipantId
     binding_factor: int
-
-
-@dataclass(frozen=True)
-class SecretShare:
-    index: ParticipantId  # x-coordinate
-    value: int  # y = f(x) mod n
 
 
 @dataclass(frozen=True)
