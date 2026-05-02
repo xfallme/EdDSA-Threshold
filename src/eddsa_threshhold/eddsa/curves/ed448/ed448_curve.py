@@ -35,7 +35,7 @@ class Ed448Curve(EdwardsCurve):
         return self._scalar_ops
 
     @property
-    def base_point(self):
+    def base_point(self) -> Tuple:
         return BASE
 
     # Point addition
