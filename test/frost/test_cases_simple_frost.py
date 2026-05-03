@@ -152,11 +152,11 @@ ed448_vector = SimpleNamespace(
     sig_expected=b"cd642cba59c449dad8e896a78a60e8edfcbd9040df524370891ff8077d47ce721d683874483795f0d85efcbd642c4510614328605a19c6ed806ffb773b6956419537cdfdb2b2a51948733de192dcc4b82dc31580a536db6d435e0cb3ce322fbcf9ec23362dda27092c08767e607bf2093600"
 )
 
-def case_ed25519() -> Tuple[SimpleNamespace, Callable, Callable, Callable]:
+def case_frost_ed25519() -> Tuple[SimpleNamespace, Callable, Callable, Callable]:
     """Inputs for simple FROST signing and verification test with ed25519"""
     return ed25519_vector, lambda: Ed25519FrostHashing(), lambda: Ed25519Curve(), lambda sig, msg, pk: Ed25519.verify(sig, msg, pk)
 
 
-def case_ed448() -> Tuple[SimpleNamespace, Callable, Callable, Callable]:
+def case_frost_ed448() -> Tuple[SimpleNamespace, Callable, Callable, Callable]:
     """Inputs for simple FROST signing and verification test with ed448"""
     return ed448_vector, lambda: Ed448FrostHashing(), lambda: Ed448Curve(), lambda sig, msg, pk: Ed448.verify(sig, msg, pk, b"")
