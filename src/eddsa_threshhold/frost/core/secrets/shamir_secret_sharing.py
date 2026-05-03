@@ -21,9 +21,9 @@ class ShamirSecretSharing(SecretSharing):
         coeffs = [secret] + [self.scalar_ops.random_scalar() for _ in range(1, self.t)]
 
         shares = []
-        for i in range(self.n, 0, -1):
+        for i in range(1, self.n + 1):
             secret_key_share_i = evaluate_polynomial(coeffs, i, self.scalar_ops)
-            shares.append(SecretShare(index=i, value=secret_key_share_i))
+            shares.append(SecretShare(i, secret_key_share_i))
 
         return shares
 

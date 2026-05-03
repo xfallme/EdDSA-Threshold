@@ -20,8 +20,8 @@ class GroupInfo:
 @dataclass(frozen=True)
 class NonceCommitment:
     participant_id: ParticipantId
-    hiding_commitment: Any
-    binding_commitment: Any
+    hiding_nonce_commitment: Tuple[int, int]
+    binding_nonce_commitment: Tuple[int, int]
 
 
 @dataclass(frozen=True)

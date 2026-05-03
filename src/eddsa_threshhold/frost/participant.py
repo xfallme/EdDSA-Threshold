@@ -50,8 +50,8 @@ class FrostParticipant:
         hiding_nonce = generate_nonce(encoded_secret_share, self.hashing)
         binding_nonce = generate_nonce(encoded_secret_share, self.hashing)
         
-        hiding_nonce_commitment = self.curve.scalar_mult(hiding_nonce, self.curve.base_point)
-        binding_nonce_commitment = self.curve.scalar_mult(binding_nonce, self.curve.base_point)
+        hiding_nonce_commitment = self.curve.extended_to_affine(self.curve.scalar_mult(hiding_nonce, None)) # None means base point
+        binding_nonce_commitment = self.curve.extended_to_affine(self.curve.scalar_mult(binding_nonce, None))
 
         self._nonce_pair = (hiding_nonce, binding_nonce)
 

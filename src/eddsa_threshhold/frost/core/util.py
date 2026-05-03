@@ -22,8 +22,7 @@ def encode_group_commitments(commitments: list[NonceCommitment], encoding: Encod
     encoded_group_commitment = b""
 
     for commitment in group_commitments:
-        encoded_commitment = encoding.encode_scalar(commitment.participant_id) + encoding.encode_point(
-            commitment.hiding_commitment) + encoding.encode_point(commitment.binding_commitment)
+        encoded_commitment = encoding.encode_scalar(commitment.participant_id) + encoding.encode_point(commitment.hiding_nonce_commitment) + encoding.encode_point(commitment.binding_nonce_commitment)
         encoded_group_commitment = encoded_group_commitment + encoded_commitment
 
     return encoded_group_commitment
@@ -58,7 +57,7 @@ def compute_binding_factors(group_public_key: bytes, commitments: list[NonceComm
     for commitment in commitments:
         rho_input = rho_prefix + encoding.encode_scalar(commitment.participant_id)
         binding_factor = hashing.h1(rho_input)
-        binding_factors.append((commitment.participant_id, binding_factor))
+        binding_factors.append(BindingFactor(commitment.participant_id, binding_factor))
     return binding_factors
 
 
@@ -67,16 +66,16 @@ def compute_group_commitment(commitments: list[NonceCommitment], binding_factors
     """
     Computes the group commitment from a list of NonceCommitments and BindingFactors.
     """
-    group_commitment = curve.base_point
+    group_commitment = (0, 1, 1, 0)  # Neutral element in extended coordinates
 
     for commitment in commitments:
         binding_factor = binding_factor_for_participant(commitment.participant_id, binding_factors)
-        binding_nonce = curve.scalar_mult(commitment.binding_commitment, binding_factor)
+        binding_nonce = curve.scalar_mult(binding_factor, curve.affine_to_extended(commitment.binding_nonce_commitment))
 
-        group_commitment = curve.add(group_commitment, commitment.hiding_commitment)
+        group_commitment = curve.add(group_commitment, curve.affine_to_extended(commitment.hiding_nonce_commitment))
         group_commitment = curve.add(group_commitment, binding_nonce)
 
-    return group_commitment
+    return curve.extended_to_affine(group_commitment)
 
 
 def compute_challenge(group_commitment: Tuple, group_public_key: bytes, message: bytes, hashing: FrostHashing, encoding: Encoding) -> int:
