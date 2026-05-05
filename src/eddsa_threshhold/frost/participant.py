@@ -10,7 +10,7 @@ from eddsa_threshhold.frost.core.util import binding_factor_for_participant, com
 
 class FrostParticipant:
     """
-    Participant-side for a 2-round FROST signing flow.
+    Participant-side implementation for a 2-round FROST signing flow.
 
     The participant owns one long-term secret key share and ephemeral nonces.
     """

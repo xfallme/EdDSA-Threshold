@@ -3,6 +3,9 @@ from typing import Callable
 
 from pytest_cases import parametrize_with_cases
 
+from eddsa_threshhold.eddsa.curves.base.edwards_curve import EdwardsCurve
+from eddsa_threshhold.frost.core.base.frost_hashing import FrostHashing
+from eddsa_threshhold.frost.core.dealer import FrostDealer
 from eddsa_threshhold.frost.core.types import SigningPackage
 from eddsa_threshhold.frost.core.util import binding_factor_for_participant, compute_binding_factors
 from eddsa_threshhold.frost.participant import FrostParticipant
@@ -10,20 +13,21 @@ from eddsa_threshhold.frost.coordinator import FrostCoordinator
 
 
 @parametrize_with_cases("vector, hashing_con, curve_con, verifier", cases="test_cases_simple_frost")
-def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable, curve_con: Callable, verifier: Callable):
+def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[], FrostHashing], curve_con: Callable[[], EdwardsCurve], verifier: Callable):
     """
     End-to-end test for a simple 2-of-3 FROST signing flow, using test vectors from the FROST paper. 
     This test covers the happy path and checks intermediate values against the test vectors at each step.
     Uses mocking to control randomness for deterministic outputs that can be checked against the test vectors.
     """
 
-    m=bytes.fromhex(vector.message)
+    m = bytes.fromhex(vector.message)
 
-    curve=curve_con()
-    coordinator=FrostCoordinator(vector.MIN_PARTICIPANTS, vector.participant_list, hashing_con(), curve_con())
+    curve = curve_con()
+    coordinator = FrostCoordinator(vector.MIN_PARTICIPANTS, vector.participant_list, hashing_con(), curve_con())
 
+    trusted_dealer = FrostDealer.from_private_bytes(vector.group_secret_key, vector.MIN_PARTICIPANTS, vector.participant_list, hashing_con(), curve_con())
     mocker.patch('eddsa_threshhold.eddsa.curves.base.scalar_ops.ScalarOps.random_scalar', return_value=vector.share_polynomial_coefficients[1])
-    shares, group_info, vss_commitments = coordinator.trusted_dealer_keygen(vector.group_secret_key)
+    shares, group_info, vss_commitments = trusted_dealer.keygen()
 
     # This block checks secret sharing outputs against test vectors
     assert group_info.group_public_key == bytes.fromhex(vector.group_public_key_expected)
@@ -35,17 +39,17 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable, cu
     assert shares[2].value == vector.participant_shares[3]
 
     # This test acts as distributor for the participants, in a real implementation this would be done out-of-band
-    p1=FrostParticipant(1, shares[0], group_info, hashing_con(), curve_con())
-    p2=FrostParticipant(2, shares[1], group_info, hashing_con(), curve_con())
-    p3=FrostParticipant(3, shares[2], group_info, hashing_con(), curve_con())
+    p1 = FrostParticipant(1, shares[0], group_info, hashing_con(), curve_con())
+    p2 = FrostParticipant(2, shares[1], group_info, hashing_con(), curve_con())
+    p3 = FrostParticipant(3, shares[2], group_info, hashing_con(), curve_con())
 
     mocker.patch('eddsa_threshhold.frost.core.util.os.urandom', side_effect=[bytes.fromhex(vector.hiding_nonce_randomness[1]), bytes.fromhex(vector.binding_nonce_randomness[1]), bytes.fromhex(vector.hiding_nonce_randomness[3]), bytes.fromhex(vector.binding_nonce_randomness[3])])
-    c1=p1.round_one_commit()
+    c1 = p1.round_one_commit()
     # c2 = p2.round_one_commit()
-    c3=p3.round_one_commit()
+    c3 = p3.round_one_commit()
 
-    commitments=[c1, c3]
-    binding_factors=compute_binding_factors(group_info.group_public_key, commitments, m, hashing_con(), curve_con().encoding)
+    commitments = [c1, c3]
+    binding_factors = compute_binding_factors(group_info.group_public_key, commitments, m, hashing_con(), curve_con().encoding)
 
     # This block checks round one outputs against test vectors
     assert c1.participant_id == 1
@@ -59,9 +63,9 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable, cu
     assert binding_factor_for_participant(1, binding_factors) == vector.binding_factor[1]
     assert binding_factor_for_participant(3, binding_factors) == vector.binding_factor[3]
 
-    s1=p1.round_two_sign(SigningPackage("TODO", m, vector.signing_participant_list, {1: c1, 3: c3}))
-    s3=p3.round_two_sign(SigningPackage("TODO", m, vector.signing_participant_list, {1: c1, 3: c3}))
-    sig=coordinator.aggregate(commitments, m, group_info.group_public_key, {1: s1, 3: s3})
+    s1 = p1.round_two_sign(SigningPackage("TODO", m, vector.signing_participant_list, {1: c1, 3: c3}))
+    s3 = p3.round_two_sign(SigningPackage("TODO", m, vector.signing_participant_list, {1: c1, 3: c3}))
+    sig = coordinator.aggregate(commitments, m, group_info.group_public_key, {1: s1, 3: s3})
 
     # This block checks round two outputs against test vectors
     assert s1 == vector.sig_share[1]

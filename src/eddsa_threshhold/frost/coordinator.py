@@ -9,10 +9,9 @@ from eddsa_threshhold.frost.core.util import compute_binding_factors, compute_gr
 
 class FrostCoordinator:
     """
-    Coordinator-side skeleton for a 2-round FROST signing flow.
+    Coordinator-side implementation for a 2-round FROST signing flow.
 
-    Cryptographic operations are delegated through callback hooks so this class
-    can stay curve/algorithm agnostic.
+    Cryptographic operations are delegated through callback hooks so this class can stay curve/algorithm agnostic.
     """
 
     def __init__(self, threshold: int, participant_ids: list[ParticipantId], hashing: FrostHashing, curve: EdwardsCurve):
@@ -30,19 +29,6 @@ class FrostCoordinator:
 
         self.hashing = hashing
         self.curve = curve
-        self.secret_sharing = ShamirSecretSharing(self.threshold, len(self.participant_ids), self.curve.scalar_ops)
-
-    def trusted_dealer_keygen(self, secret: int) -> Tuple[list[SecretShare], GroupInfo, Any]:
-        """
-        Trusted dealer key generation.
-        """
-
-        shares = self.secret_sharing.split(secret)
-        group_public_key = self.curve.scalar_mult(secret, None) # None means base point
-
-        group_info = GroupInfo(self.curve.encode_extended_point(group_public_key), {})
-
-        return shares, group_info, Any  # TODO VSS commitments
 
     def aggregate(self, commitments: list[NonceCommitment], message: bytes, group_public_key: bytes, signature_shares: dict[ParticipantId, int]) -> bytes:
         """
