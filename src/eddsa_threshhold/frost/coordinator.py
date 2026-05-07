@@ -1,7 +1,7 @@
 from eddsa_threshhold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshhold.frost.core.base.frost_hashing import FrostHashing
 from eddsa_threshhold.frost.core.secrets.shamir_secret_sharing import ShamirSecretSharing
-from eddsa_threshhold.frost.core.types import GroupInfo, NonceCommitment, ParticipantId, SecretShare, SessionId, SigningPackage, SigningSession
+from eddsa_threshhold.frost.core.frost_types import GroupInfo, NonceCommitment, ParticipantId, SecretShare, SessionId, SigningPackage, SigningSession
 from eddsa_threshhold.frost.core.util import compute_binding_factors, compute_group_commitment
 
 

@@ -2,9 +2,8 @@ from typing import Tuple
 
 from eddsa_threshhold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshhold.frost.core.base.frost_hashing import FrostHashing
-from eddsa_threshhold.frost.coordinator import ParticipantId, SessionId
+from eddsa_threshhold.frost.core.frost_types import GroupInfo, NonceCommitment, ParticipantId, SecretShare, SessionId, SigningPackage
 from eddsa_threshhold.frost.core.polynomial import derive_interpolating_value
-from eddsa_threshhold.frost.core.types import GroupInfo, NonceCommitment, SecretShare, SigningPackage
 from eddsa_threshhold.frost.core.util import binding_factor_for_participant, compute_binding_factors, compute_challenge, compute_group_commitment, generate_nonce, participants_from_commitment_list
 
 

@@ -6,7 +6,7 @@ from pytest_cases import parametrize_with_cases
 from eddsa_threshhold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshhold.frost.core.base.frost_hashing import FrostHashing
 from eddsa_threshhold.frost.core.dealer import FrostDealer
-from eddsa_threshhold.frost.core.types import SigningPackage
+from eddsa_threshhold.frost.core.frost_types import SigningPackage
 from eddsa_threshhold.frost.core.util import binding_factor_for_participant, compute_binding_factors
 from eddsa_threshhold.frost.participant import FrostParticipant
 from eddsa_threshhold.frost.coordinator import FrostCoordinator

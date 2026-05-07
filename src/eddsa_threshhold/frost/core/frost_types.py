@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
-from typing import Any, Tuple
+
+from typing import Tuple
 
 ParticipantId = int
 SessionId = str
@@ -7,14 +8,14 @@ SessionId = str
 
 @dataclass(frozen=True)
 class SecretShare:
-    index: ParticipantId  # x-coordinate
-    value: int  # y = f(x) mod n
+    index: ParticipantId
+    value: int
 
 
 @dataclass(frozen=True)
 class GroupInfo:
     group_public_key: bytes
-    public_keys: dict[ParticipantId, Tuple]
+    public_keys: dict[ParticipantId, Tuple[int, int]]
 
 
 @dataclass(frozen=True)

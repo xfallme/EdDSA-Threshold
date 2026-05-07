@@ -4,7 +4,7 @@ import os
 from eddsa_threshhold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshhold.eddsa.curves.base.encoding import Encoding
 from eddsa_threshhold.frost.core.base.frost_hashing import FrostHashing
-from eddsa_threshhold.frost.core.types import BindingFactor, NonceCommitment, ParticipantId
+from eddsa_threshhold.frost.core.frost_types import BindingFactor, NonceCommitment, ParticipantId
 
 
 def generate_nonce(secret: bytes, hashing: FrostHashing) -> int:

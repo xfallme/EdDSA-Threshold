@@ -3,7 +3,7 @@ from typing import Any, Tuple
 from eddsa_threshhold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshhold.frost.core.base.frost_hashing import FrostHashing
 from eddsa_threshhold.frost.core.secrets.shamir_secret_sharing import ShamirSecretSharing
-from eddsa_threshhold.frost.core.types import GroupInfo, ParticipantId, SecretShare
+from eddsa_threshhold.frost.core.frost_types import GroupInfo, ParticipantId, SecretShare
 
 
 class FrostDealer:

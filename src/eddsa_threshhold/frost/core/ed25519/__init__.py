@@ -1,0 +1,1 @@
+"""Ed25519-specific FROST helpers."""
