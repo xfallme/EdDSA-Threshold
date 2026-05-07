@@ -1,5 +1,5 @@
 [project]
-name = "eddsa-threshhold"
+name = "eddsa-threshold"
 version = "0.2.0"
 description = "Educational EdDSA and FROST implementations"
 readme = "README.md"

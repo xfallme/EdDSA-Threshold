@@ -1,7 +1,7 @@
 import binascii
 import pytest
-from eddsa_threshhold.eddsa.keys.ed25519_keypair import Ed25519Keypair
-from eddsa_threshhold.eddsa.keys.ed448_keypair import Ed448Keypair
+from eddsa_threshold.eddsa.keys.ed25519_keypair import Ed25519Keypair
+from eddsa_threshold.eddsa.keys.ed448_keypair import Ed448Keypair
 from test_cases_eddsa_vectors import *
 
 

@@ -3,13 +3,13 @@ from typing import Callable
 
 from pytest_cases import parametrize_with_cases
 
-from eddsa_threshhold.eddsa.curves.base.edwards_curve import EdwardsCurve
-from eddsa_threshhold.frost.core.base.frost_hashing import FrostHashing
-from eddsa_threshhold.frost.core.dealer import FrostDealer
-from eddsa_threshhold.frost.core.frost_types import SigningPackage
-from eddsa_threshhold.frost.core.util import binding_factor_for_participant, compute_binding_factors
-from eddsa_threshhold.frost.participant import FrostParticipant
-from eddsa_threshhold.frost.coordinator import FrostCoordinator
+from eddsa_threshold.eddsa.curves.base.edwards_curve import EdwardsCurve
+from eddsa_threshold.frost.core.base.frost_hashing import FrostHashing
+from eddsa_threshold.frost.core.dealer import FrostDealer
+from eddsa_threshold.frost.core.frost_types import SigningPackage
+from eddsa_threshold.frost.core.util import binding_factor_for_participant, compute_binding_factors
+from eddsa_threshold.frost.participant import FrostParticipant
+from eddsa_threshold.frost.coordinator import FrostCoordinator
 
 
 @parametrize_with_cases("vector, hashing_con, curve_con, verifier", cases="test_cases_simple_frost")
@@ -26,7 +26,7 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
     coordinator = FrostCoordinator(vector.MIN_PARTICIPANTS, vector.participant_list, hashing_con(), curve_con())
 
     trusted_dealer = FrostDealer.from_private_bytes(vector.group_secret_key, vector.MIN_PARTICIPANTS, vector.participant_list, hashing_con(), curve_con())
-    mocker.patch('eddsa_threshhold.eddsa.curves.base.scalar_ops.ScalarOps.random_scalar', return_value=vector.share_polynomial_coefficients[1])
+    mocker.patch('eddsa_threshold.eddsa.curves.base.scalar_ops.ScalarOps.random_scalar', return_value=vector.share_polynomial_coefficients[1])
     shares, group_info, vss_commitments = trusted_dealer.keygen()
 
     # This block checks secret sharing outputs against test vectors
@@ -43,7 +43,7 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
     p2 = FrostParticipant(2, shares[1], group_info, hashing_con(), curve_con())
     p3 = FrostParticipant(3, shares[2], group_info, hashing_con(), curve_con())
 
-    mocker.patch('eddsa_threshhold.frost.core.util.os.urandom', side_effect=[bytes.fromhex(vector.hiding_nonce_randomness[1]), bytes.fromhex(vector.binding_nonce_randomness[1]), bytes.fromhex(vector.hiding_nonce_randomness[3]), bytes.fromhex(vector.binding_nonce_randomness[3])])
+    mocker.patch('eddsa_threshold.frost.core.util.os.urandom', side_effect=[bytes.fromhex(vector.hiding_nonce_randomness[1]), bytes.fromhex(vector.binding_nonce_randomness[1]), bytes.fromhex(vector.hiding_nonce_randomness[3]), bytes.fromhex(vector.binding_nonce_randomness[3])])
     c1 = p1.round_one_commit()
     # c2 = p2.round_one_commit()
     c3 = p3.round_one_commit()

@@ -1,9 +1,9 @@
 import binascii
 import pytest
 
-from eddsa_threshhold.eddsa.algorithms.ed448 import Ed448
-from eddsa_threshhold.eddsa.algorithms.ed448ph import Ed448PH
-from eddsa_threshhold.eddsa.keys.ed448_keypair import Ed448Keypair
+from eddsa_threshold.eddsa.algorithms.ed448 import Ed448
+from eddsa_threshold.eddsa.algorithms.ed448ph import Ed448PH
+from eddsa_threshold.eddsa.keys.ed448_keypair import Ed448Keypair
 from test_cases_eddsa_vectors import *
 
 

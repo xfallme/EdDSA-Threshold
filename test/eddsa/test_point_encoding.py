@@ -3,9 +3,9 @@ from nacl.bindings import crypto_scalarmult_ed25519_base_noclamp
 
 from pytest_cases import parametrize_with_cases
 
-from eddsa_threshhold.eddsa.curves.base.edwards_curve import EdwardsCurve
-from eddsa_threshhold.eddsa.curves.ed25519.ed25519_curve import Ed25519Curve
-from eddsa_threshhold.eddsa.curves.ed25519 import constants as ed25519constants
+from eddsa_threshold.eddsa.curves.base.edwards_curve import EdwardsCurve
+from eddsa_threshold.eddsa.curves.ed25519.ed25519_curve import Ed25519Curve
+from eddsa_threshold.eddsa.curves.ed25519 import constants as ed25519constants
 
 
 @parametrize_with_cases("curve, constants", cases="test_cases_curves")

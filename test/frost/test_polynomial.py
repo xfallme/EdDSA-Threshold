@@ -1,7 +1,7 @@
 from pytest_cases import parametrize_with_cases
 
-from eddsa_threshhold.eddsa.curves.base.scalar_ops import ScalarOps
-from eddsa_threshhold.frost.core.polynomial import derive_interpolating_value, evaluate_polynomial
+from eddsa_threshold.eddsa.curves.base.scalar_ops import ScalarOps
+from eddsa_threshold.frost.core.polynomial import derive_interpolating_value, evaluate_polynomial
 
 
 @parametrize_with_cases("scalar_ops", cases="test_cases_scalars")

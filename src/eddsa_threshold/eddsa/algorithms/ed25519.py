@@ -1,0 +1,84 @@
+from typing import Callable
+from eddsa_threshold.eddsa.curves.ed25519.ed25519_curve import Ed25519Curve
+from eddsa_threshold.eddsa.curves.ed25519.scalar_ops import Ed25519ScalarOps
+from eddsa_threshold.eddsa.curves.ed25519.constants import SCALAR_SIZE
+from eddsa_threshold.eddsa.keys.ed25519_keypair import Ed25519Keypair
+from eddsa_threshold.eddsa.util.dom import dom2
+from eddsa_threshold.eddsa.util.hash_bindings import sha512
+
+
+class Ed25519():
+    """
+    EdDSA using the Ed25519 curve.
+    Implements signing and verification methods.
+    """
+
+    @staticmethod
+    def sign(message: bytes, keypair: Ed25519Keypair) -> bytes:
+        """Sign a message using the provided Ed25519 keypair."""
+
+        return Ed25519._sign(message, keypair, ph=lambda m: m, dom2=dom2(0, None))
+
+    @staticmethod
+    def verify(signature: bytes, message: bytes, public_key: bytes) -> bool:
+        """Verify a signature for a message using the provided Ed25519 public key."""
+
+        return Ed25519._verify(signature, message, public_key, ph=lambda m: m, dom2=dom2(0, None))
+
+    @staticmethod
+    def _sign(message: bytes, keypair: Ed25519Keypair, ph: Callable, dom2: bytes) -> bytes:
+        """Internal sign method as basis for subclasses."""
+
+        curve = Ed25519Curve()
+
+        # Sign message according to RFC 8032 Section 5.1.6
+        # 1. Get precomputed prefix
+        prefix = keypair.prefix
+
+        # 2. Compute the nonce
+        r = int.from_bytes(sha512(dom2 + prefix + ph(message)), byteorder='little')
+
+        # 3. Compute the R point
+        r = curve.scalar_ops.reduce(r)
+        R = curve.encode_extended_point(curve.scalar_mult(r))
+
+        # 4. Compute the challenge
+        k = int.from_bytes(sha512(dom2 + R + keypair.public_bytes + ph(message)), byteorder='little')
+
+        # 5. Compute the S value
+        k = curve.scalar_ops.reduce(k)
+        S = curve.scalar_ops.reduce(r + k * keypair.scalar)
+
+        return R + curve._encoding.encode_scalar(S)
+
+    @staticmethod
+    def _verify(signature: bytes, message: bytes, public_key: bytes, ph: Callable, dom2: bytes) -> bool:
+        """Internal verify method as basis for subclasses."""
+
+        curve = Ed25519Curve()
+
+        # Verify signature according to RFC 8032 Section 5.1.7
+        if len(signature) != 64:
+            return False
+
+        try:
+            # 1. Decode R and S from the signature
+            R = curve.decode_point(signature[:SCALAR_SIZE])
+            S = curve._encoding.decode_scalar(signature[SCALAR_SIZE:])
+            if S >= curve.scalar_ops.order or S < 0:
+                return False
+
+            A = curve.decode_point(public_key)
+
+            # 2. Compute the challenge
+            k = int.from_bytes(sha512(dom2 + signature[:SCALAR_SIZE] + public_key + ph(message)), byteorder='little')
+            k = curve.scalar_ops.reduce(k)
+
+            # 3. Verify the equation [S]B = R + [k]A
+            left = curve.scalar_mult(S)
+            right = curve.add(curve.affine_to_extended(R), curve.scalar_mult(k, curve.affine_to_extended(A)))
+
+            return curve.extended_to_affine(left) == curve.extended_to_affine(right)
+
+        except ValueError:
+            return False

@@ -1,12 +1,12 @@
 from types import SimpleNamespace
 from typing import Callable, Tuple
 
-from eddsa_threshhold.eddsa.algorithms.ed25519 import Ed25519
-from eddsa_threshhold.eddsa.algorithms.ed448 import Ed448
-from eddsa_threshhold.eddsa.curves.ed25519.ed25519_curve import Ed25519Curve
-from eddsa_threshhold.eddsa.curves.ed448.ed448_curve import Ed448Curve
-from eddsa_threshhold.frost.core.ed25519.frost_hashing import Ed25519FrostHashing
-from eddsa_threshhold.frost.core.ed448.frost_hashing import Ed448FrostHashing
+from eddsa_threshold.eddsa.algorithms.ed25519 import Ed25519
+from eddsa_threshold.eddsa.algorithms.ed448 import Ed448
+from eddsa_threshold.eddsa.curves.ed25519.ed25519_curve import Ed25519Curve
+from eddsa_threshold.eddsa.curves.ed448.ed448_curve import Ed448Curve
+from eddsa_threshold.frost.core.ed25519.frost_hashing import Ed25519FrostHashing
+from eddsa_threshold.frost.core.ed448.frost_hashing import Ed448FrostHashing
 
 
 def le_hex_to_int(b: bytes) -> int:

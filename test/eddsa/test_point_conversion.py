@@ -1,6 +1,6 @@
 from pytest_cases import parametrize_with_cases
 
-from eddsa_threshhold.eddsa.curves.base.edwards_curve import EdwardsCurve
+from eddsa_threshold.eddsa.curves.base.edwards_curve import EdwardsCurve
 
 
 @parametrize_with_cases("curve, constants", cases="test_cases_curves")
