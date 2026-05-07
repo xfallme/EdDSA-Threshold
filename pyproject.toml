@@ -3,6 +3,7 @@ name = "eddsa-threshhold"
 version = "0.2.0"
 description = "Educational EdDSA and FROST implementations"
 readme = "README.md"
+license = "0BSD"
 requires-python = ">=3.10"
 dependencies = ["pynacl>=1.5.0"]
 
