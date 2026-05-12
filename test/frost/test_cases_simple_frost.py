@@ -14,6 +14,7 @@ def le_hex_to_int(b: bytes) -> int:
 
 ed25519_vector = SimpleNamespace(
     # E.1. FROST(Ed25519, SHA-512)
+    alg="FROST(Ed25519, SHA-512)",
     # Test vectors from RFC9591
 
     # Configuration information
@@ -84,6 +85,7 @@ ed25519_vector = SimpleNamespace(
 
 ed448_vector = SimpleNamespace(
     # E.2. FROST(Ed448, SHAKE256)
+    alg="FROST(Ed448, SHAKE256)",
     # Test vectors from RFC9591
 
     # Configuration information

@@ -74,3 +74,9 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
 
     is_valid = verifier(sig, m, group_info.group_public_key)
     assert is_valid, "Signature verification failed"
+    
+    print("\n" + vector.alg)
+    print("Running test with 2 out of 3")
+    print("Message:", m.hex())
+    print("Group Public Key:", group_info.group_public_key.hex())
+    print("Signature:", sig.hex())
