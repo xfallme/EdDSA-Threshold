@@ -3,6 +3,7 @@ import os
 
 from eddsa_threshold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshold.eddsa.curves.base.encoding import Encoding
+from eddsa_threshold.eddsa.curves.base.scalar_ops import ScalarOps
 from eddsa_threshold.frost.core.base.frost_hashing import FrostHashing
 from eddsa_threshold.frost.core.frost_types import BindingFactor, NonceCommitment, ParticipantId
 
@@ -84,3 +85,21 @@ def compute_challenge(group_commitment: Tuple, group_public_key: bytes, message:
     """
     challenge_input = encoding.encode_point(group_commitment) + group_public_key + message
     return hashing.h2(challenge_input)
+
+
+def check_participant_bounds(threshold: int, participant_ids: list[ParticipantId], scalar_ops: ScalarOps) -> None:
+    """
+    Checks that participant ids are within valid bounds
+    """
+    if threshold <= 0:
+        raise ValueError("threshold must be positive")
+    if len(participant_ids) < threshold:
+        raise ValueError("number of participants must be >= threshold")
+    if len(participant_ids) <= 0:
+        raise ValueError("number of participants must be positive")
+    if len(participant_ids) >= scalar_ops.order:
+        raise ValueError("number of participants must be less than the curve order")
+
+    unique_ids = set(participant_ids)
+    if len(unique_ids) != len(participant_ids):
+        raise ValueError("participant ids must be unique")

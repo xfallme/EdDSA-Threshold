@@ -2,7 +2,7 @@ from eddsa_threshold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshold.frost.core.base.frost_hashing import FrostHashing
 from eddsa_threshold.frost.core.secrets.shamir_secret_sharing import ShamirSecretSharing
 from eddsa_threshold.frost.core.frost_types import GroupInfo, NonceCommitment, ParticipantId, SecretShare, SessionId, SigningPackage, SigningSession
-from eddsa_threshold.frost.core.util import compute_binding_factors, compute_group_commitment
+from eddsa_threshold.frost.core.util import check_participant_bounds, compute_binding_factors, compute_group_commitment
 
 
 class FrostCoordinator:
@@ -15,15 +15,11 @@ class FrostCoordinator:
     def __init__(self, threshold: int, participant_ids: list[ParticipantId], hashing: FrostHashing, curve: EdwardsCurve):
         if threshold <= 0:
             raise ValueError("threshold must be positive")
-        if len(participant_ids) < threshold:
-            raise ValueError("number of participants must be >= threshold")
-
-        unique_ids = set(participant_ids)
-        if len(unique_ids) != len(participant_ids):
-            raise ValueError("participant ids must be unique")
+        
+        check_participant_bounds(threshold, participant_ids, curve.scalar_ops)
 
         self.threshold = threshold
-        self.participant_ids = unique_ids
+        self.participant_ids = participant_ids
 
         self.hashing = hashing
         self.curve = curve

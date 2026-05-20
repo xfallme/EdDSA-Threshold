@@ -4,6 +4,7 @@ from eddsa_threshold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshold.frost.core.base.frost_hashing import FrostHashing
 from eddsa_threshold.frost.core.secrets.shamir_secret_sharing import ShamirSecretSharing
 from eddsa_threshold.frost.core.frost_types import GroupInfo, ParticipantId, SecretShare
+from eddsa_threshold.frost.core.util import check_participant_bounds
 
 
 class FrostTrustedDealer:
@@ -11,14 +12,8 @@ class FrostTrustedDealer:
     def __init__(self, seed: int, threshold: int, participant_ids: list[ParticipantId], hashing: FrostHashing, curve: EdwardsCurve) -> None:
         if seed < 0 or seed >= curve.scalar_ops.order:
             raise ValueError("seed must be a valid scalar value for the curve")
-        if threshold <= 0:
-            raise ValueError("threshold must be positive")
-        if len(participant_ids) < threshold:
-            raise ValueError("number of participants must be >= threshold")
-
-        unique_ids = set(participant_ids)
-        if len(unique_ids) != len(participant_ids):
-            raise ValueError("participant ids must be unique")
+        
+        check_participant_bounds(threshold, participant_ids, curve.scalar_ops)
         
         self.seed = seed
         self.threshold = threshold
