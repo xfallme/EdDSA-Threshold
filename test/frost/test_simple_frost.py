@@ -5,7 +5,7 @@ from pytest_cases import parametrize_with_cases
 
 from eddsa_threshold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshold.frost.core.base.frost_hashing import FrostHashing
-from eddsa_threshold.frost.core.dealer import FrostDealer
+from eddsa_threshold.frost.trusted_dealer import FrostTrustedDealer
 from eddsa_threshold.frost.core.frost_types import SigningPackage
 from eddsa_threshold.frost.core.util import binding_factor_for_participant, compute_binding_factors
 from eddsa_threshold.frost.participant import FrostParticipant
@@ -25,7 +25,7 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
     curve = curve_con()
     coordinator = FrostCoordinator(vector.MIN_PARTICIPANTS, vector.participant_list, hashing_con(), curve_con())
 
-    trusted_dealer = FrostDealer.from_private_bytes(vector.group_secret_key, vector.MIN_PARTICIPANTS, vector.participant_list, hashing_con(), curve_con())
+    trusted_dealer = FrostTrustedDealer.from_private_bytes(vector.group_secret_key, vector.MIN_PARTICIPANTS, vector.participant_list, hashing_con(), curve_con())
     mocker.patch('eddsa_threshold.eddsa.curves.base.scalar_ops.ScalarOps.random_scalar', return_value=vector.share_polynomial_coefficients[1])
     shares, group_info, vss_commitments = trusted_dealer.keygen()
 

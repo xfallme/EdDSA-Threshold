@@ -6,7 +6,7 @@ from eddsa_threshold.frost.core.secrets.shamir_secret_sharing import ShamirSecre
 from eddsa_threshold.frost.core.frost_types import GroupInfo, ParticipantId, SecretShare
 
 
-class FrostDealer:
+class FrostTrustedDealer:
     
     def __init__(self, seed: int, threshold: int, participant_ids: list[ParticipantId], hashing: FrostHashing, curve: EdwardsCurve) -> None:
         if seed < 0 or seed >= curve.scalar_ops.order:
@@ -43,12 +43,12 @@ class FrostDealer:
         return shares, group_info, Any  # TODO VSS commitments
     
     @classmethod
-    def from_private_bytes(cls, seed: int, threshold: int, participant_ids: list[ParticipantId], hashing: FrostHashing, curve: EdwardsCurve) -> FrostDealer: 
+    def from_private_bytes(cls, seed: int, threshold: int, participant_ids: list[ParticipantId], hashing: FrostHashing, curve: EdwardsCurve) -> FrostTrustedDealer: 
         """Create a dealer instance from the given private seed bytes."""
         return cls(seed, threshold, participant_ids, hashing, curve)
 
     @classmethod
-    def generate(cls, threshold: int, participant_ids: list[ParticipantId], hashing: FrostHashing, curve: EdwardsCurve) -> FrostDealer: 
+    def generate(cls, threshold: int, participant_ids: list[ParticipantId], hashing: FrostHashing, curve: EdwardsCurve) -> FrostTrustedDealer: 
         """Generate a new dealer instance with a fresh secret."""
         seed = curve.scalar_ops.random_scalar()
         return cls(seed, threshold, participant_ids, hashing, curve)
