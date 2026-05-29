@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import Tuple
 
 ParticipantId = int
-SessionId = str
+SessionId = int
 
 
 @dataclass(frozen=True)
@@ -43,8 +43,9 @@ class SigningPackage:
 class SigningSession:
     session_id: SessionId
     message: bytes
-    threshold: int
-    participant_ids: set[ParticipantId]
+    participant_ids: list[ParticipantId] = field(default_factory=list)
     commitments: dict[ParticipantId, NonceCommitment] = field(default_factory=dict)
     signature_shares: dict[ParticipantId, int] = field(default_factory=dict)
-    finalized: bool = False
+    signing_in_progress: bool = False
+    round_one_completed: bool = False
+    round_two_completed: bool = False

@@ -23,8 +23,7 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
     m = bytes.fromhex(vector.message)
 
     curve = curve_con()
-    coordinator = FrostCoordinator(vector.MIN_PARTICIPANTS, vector.participant_list, hashing_con(), curve_con())
-
+    
     trusted_dealer = FrostTrustedDealer.from_private_bytes(vector.group_secret_key, vector.MIN_PARTICIPANTS, vector.participant_list, hashing_con(), curve_con())
     mocker.patch('eddsa_threshold.eddsa.curves.base.scalar_ops.ScalarOps.random_scalar', return_value=vector.share_polynomial_coefficients[1])
     shares, group_info, vss_commitments = trusted_dealer.keygen()
@@ -38,10 +37,18 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
     assert shares[2].index == 3
     assert shares[2].value == vector.participant_shares[3]
 
+    coordinator = FrostCoordinator(vector.MIN_PARTICIPANTS, vector.participant_list, group_info, hashing_con(), curve_con())
+    
+    session_id = coordinator.create_signing_session(m)
+    
     # This test acts as distributor for the participants, in a real implementation this would be done out-of-band
     p1 = FrostParticipant(1, shares[0], group_info, hashing_con(), curve_con())
     p2 = FrostParticipant(2, shares[1], group_info, hashing_con(), curve_con())
     p3 = FrostParticipant(3, shares[2], group_info, hashing_con(), curve_con())
+    
+    coordinator.register_participant_to_session(session_id, 1)
+    coordinator.register_participant_to_session(session_id, 3)
+    coordinator.start_signing_session(session_id)
 
     mocker.patch('eddsa_threshold.frost.core.util.os.urandom', side_effect=[bytes.fromhex(vector.hiding_nonce_randomness[1]), bytes.fromhex(vector.binding_nonce_randomness[1]), bytes.fromhex(vector.hiding_nonce_randomness[3]), bytes.fromhex(vector.binding_nonce_randomness[3])])
     c1 = p1.round_one_commit()
@@ -62,10 +69,16 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
     assert curve.encode_affine_point(c3.binding_nonce_commitment) == bytes.fromhex(vector.binding_nonce_commitment[3])
     assert binding_factor_for_participant(1, binding_factors) == vector.binding_factor[1]
     assert binding_factor_for_participant(3, binding_factors) == vector.binding_factor[3]
+    
+    coordinator.receive_commitment(session_id, 1, c1)
+    coordinator.receive_commitment(session_id, 3, c3)
 
-    s1 = p1.round_two_sign(SigningPackage("TODO", m, vector.signing_participant_list, {1: c1, 3: c3}))
-    s3 = p3.round_two_sign(SigningPackage("TODO", m, vector.signing_participant_list, {1: c1, 3: c3}))
-    sig = coordinator.aggregate(commitments, m, group_info.group_public_key, {1: s1, 3: s3})
+    # TODO session id
+    s1 = p1.round_two_sign(SigningPackage(0, m, vector.signing_participant_list, {1: c1, 3: c3}))
+    s3 = p3.round_two_sign(SigningPackage(0, m, vector.signing_participant_list, {1: c1, 3: c3}))
+    coordinator.receive_signature_share(session_id, 1, s1)
+    coordinator.receive_signature_share(session_id, 3, s3)
+    sig = coordinator.aggregate(session_id)
 
     # This block checks round two outputs against test vectors
     assert s1 == vector.sig_share[1]
