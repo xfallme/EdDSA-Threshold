@@ -4,12 +4,13 @@ from typing import Tuple
 
 ParticipantId = int
 SessionId = int
+SecretValue = int
 
 
 @dataclass(frozen=True)
 class SecretShare:
     index: ParticipantId
-    value: int
+    value: SecretValue
 
 
 @dataclass(frozen=True)
@@ -45,7 +46,7 @@ class SigningSession:
     message: bytes
     participant_ids: list[ParticipantId] = field(default_factory=list)
     commitments: dict[ParticipantId, NonceCommitment] = field(default_factory=dict)
-    signature_shares: dict[ParticipantId, int] = field(default_factory=dict)
+    signature_shares: dict[ParticipantId, SecretValue] = field(default_factory=dict)
     signing_in_progress: bool = False
     round_one_completed: bool = False
     round_two_completed: bool = False

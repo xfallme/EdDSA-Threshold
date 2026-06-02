@@ -2,7 +2,7 @@ from typing import Tuple
 
 from eddsa_threshold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshold.frost.core.base.frost_hashing import FrostHashing
-from eddsa_threshold.frost.core.frost_types import GroupInfo, NonceCommitment, ParticipantId, SecretShare, SessionId, SigningPackage
+from eddsa_threshold.frost.core.frost_types import GroupInfo, NonceCommitment, ParticipantId, SecretShare, SecretValue, SessionId, SigningPackage
 from eddsa_threshold.frost.core.polynomial import derive_interpolating_value
 from eddsa_threshold.frost.core.util import binding_factor_for_participant, compute_binding_factors, compute_challenge, compute_group_commitment, generate_nonce, participants_from_commitment_list
 
@@ -33,7 +33,7 @@ class FrostParticipant:
         # TODO: check various preconditions (e.g. active session, etc.)
         return self._commit()
 
-    def round_two_sign(self, signing_package: SigningPackage) -> int:
+    def round_two_sign(self, signing_package: SigningPackage) -> SecretValue:
         """
         Round 2 of FROST signing: takes the signing package from the coordinator and returns the signature share.
         """
@@ -56,7 +56,7 @@ class FrostParticipant:
 
         return NonceCommitment(self.participant_id, hiding_nonce_commitment, binding_nonce_commitment)
 
-    def _sign(self, message: bytes, commitments: list[NonceCommitment]) -> int:
+    def _sign(self, message: bytes, commitments: list[NonceCommitment]) -> SecretValue:
         if self._nonce_pair is None:
             raise ValueError("participant must commit before signing")
 
