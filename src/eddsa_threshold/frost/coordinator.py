@@ -1,6 +1,6 @@
 from eddsa_threshold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshold.frost.core.base.frost_hashing import FrostHashing
-from eddsa_threshold.frost.core.frost_types import GroupInfo, NonceCommitment, ParticipantId, SecretValue, SessionId, SigningSession
+from eddsa_threshold.frost.core.frost_types import GroupInfo, NonceCommitment, ParticipantId, SecretValue, SessionId, SigningPackage, SigningSession
 from eddsa_threshold.frost.core.util import check_participant_bounds, compute_binding_factors, compute_group_commitment
 
 
@@ -99,6 +99,21 @@ class FrostCoordinator:
         if len(signing_session.commitments) == len(signing_session.participant_ids):
             signing_session.round_one_completed = True
             
+    def create_signing_package(self, session_id: SessionId) -> SigningPackage:
+        """
+        Creates the signing package to be sent to the participants after round one is complete.
+        """
+
+        if session_id not in self._signing_sessions:
+            raise ValueError("signing session not found")
+
+        signing_session = self._signing_sessions[session_id]
+
+        if not signing_session.round_one_completed:
+            raise ValueError("round one not completed yet")
+
+        return SigningPackage(session_id, signing_session.message, signing_session.participant_ids, signing_session.commitments)
+    
     def receive_signature_share(self, session_id: SessionId, participant_id: ParticipantId, signature_share: SecretValue) -> None:
         """
         Receives a signature share from a participant and stores it in the signing session.

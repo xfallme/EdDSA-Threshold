@@ -51,20 +51,20 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
     coordinator.start_signing_session(session_id)
 
     mocker.patch('eddsa_threshold.frost.core.util.os.urandom', side_effect=[bytes.fromhex(vector.hiding_nonce_randomness[1]), bytes.fromhex(vector.binding_nonce_randomness[1]), bytes.fromhex(vector.hiding_nonce_randomness[3]), bytes.fromhex(vector.binding_nonce_randomness[3])])
-    c1 = p1.round_one_commit()
+    c1 = p1.round_one_commit(session_id)
     # c2 = p2.round_one_commit()
-    c3 = p3.round_one_commit()
+    c3 = p3.round_one_commit(session_id)
 
     commitments = [c1, c3]
     binding_factors = compute_binding_factors(group_info.group_public_key, commitments, m, hashing_con(), curve_con().encoding)
 
     # This block checks round one outputs against test vectors
     assert c1.participant_id == 1
-    assert p1._nonce_pair == (vector.hiding_nonce[1], vector.binding_nonce[1])
+    assert p1._nonce_pair[session_id] == (vector.hiding_nonce[1], vector.binding_nonce[1])
     assert curve.encode_affine_point(c1.hiding_nonce_commitment) == bytes.fromhex(vector.hiding_nonce_commitment[1])
     assert curve.encode_affine_point(c1.binding_nonce_commitment) == bytes.fromhex(vector.binding_nonce_commitment[1])
     assert c3.participant_id == 3
-    assert p3._nonce_pair == (vector.hiding_nonce[3], vector.binding_nonce[3])
+    assert p3._nonce_pair[session_id] == (vector.hiding_nonce[3], vector.binding_nonce[3])
     assert curve.encode_affine_point(c3.hiding_nonce_commitment) == bytes.fromhex(vector.hiding_nonce_commitment[3])
     assert curve.encode_affine_point(c3.binding_nonce_commitment) == bytes.fromhex(vector.binding_nonce_commitment[3])
     assert binding_factor_for_participant(1, binding_factors) == vector.binding_factor[1]
@@ -73,9 +73,10 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
     coordinator.receive_commitment(session_id, 1, c1)
     coordinator.receive_commitment(session_id, 3, c3)
 
-    # TODO session id
-    s1 = p1.round_two_sign(SigningPackage(0, m, vector.signing_participant_list, {1: c1, 3: c3}))
-    s3 = p3.round_two_sign(SigningPackage(0, m, vector.signing_participant_list, {1: c1, 3: c3}))
+    signing_package = coordinator.create_signing_package(session_id)
+
+    s1 = p1.round_two_sign(signing_package)
+    s3 = p3.round_two_sign(signing_package)
     coordinator.receive_signature_share(session_id, 1, s1)
     coordinator.receive_signature_share(session_id, 3, s3)
     sig = coordinator.aggregate(session_id)

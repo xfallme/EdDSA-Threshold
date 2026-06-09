@@ -23,55 +23,61 @@ class FrostParticipant:
         self.hashing = hashing
         self.curve = curve
 
-        self._active_session_id: SessionId | None = None  # TODO
-        self._nonce_pair: Tuple[int, int] | None = None
+        self._nonce_pair: dict[SessionId, Tuple[int, int]] = dict()  # store nonce pairs for active signing sessions, cleared after signing is complete
 
-    def round_one_commit(self) -> NonceCommitment:
+    def round_one_commit(self, session_id: SessionId) -> NonceCommitment:
         """
         Round 1 of FROST signing: generates a nonce pair and returns the corresponding commitment.
         """
-        # TODO: check various preconditions (e.g. active session, etc.)
-        return self._commit()
+        
+        if session_id in self._nonce_pair:
+            raise ValueError("participant has already committed to this signing session")
+        
+        nonce_pair, commitment = self._commit(self.secret_share, self.curve, self.hashing)
+        self._nonce_pair[session_id] = nonce_pair
+
+        return commitment
 
     def round_two_sign(self, signing_package: SigningPackage) -> SecretValue:
         """
         Round 2 of FROST signing: takes the signing package from the coordinator and returns the signature share.
         """
-        # TODO: check various preconditions (e.g. active session, etc.)
-        signature_share = self._sign(signing_package.message, list(signing_package.commitments.values()))
         
-        self._nonce_pair = None  # clear nonces from memory after signing, MUST not be reused for another signing session
+        if signing_package.session_id not in self._nonce_pair:
+            raise ValueError("participant must commit to this signing session before signing")
+        
+        nonce_pair = self._nonce_pair[signing_package.session_id]
+        signature_share = self._sign(signing_package.message, list(signing_package.commitments.values()), self.secret_share, nonce_pair, self.group_info, self.curve, self.hashing)
+        
+        self._nonce_pair.pop(signing_package.session_id)  # clear nonce pair for this session since signing is complete
         
         return signature_share
 
-    def _commit(self) -> NonceCommitment:
-        encoded_secret_share = self.curve.encoding.encode_scalar(self.secret_share.value)
-        hiding_nonce = generate_nonce(encoded_secret_share, self.hashing)
-        binding_nonce = generate_nonce(encoded_secret_share, self.hashing)
-        
-        hiding_nonce_commitment = self.curve.extended_to_affine(self.curve.scalar_mult(hiding_nonce, None)) # None means base point
-        binding_nonce_commitment = self.curve.extended_to_affine(self.curve.scalar_mult(binding_nonce, None))
+    @staticmethod
+    def _commit(secret_share: SecretShare, curve: EdwardsCurve, hashing: FrostHashing) -> Tuple[Tuple[int, int], NonceCommitment]:
+        encoded_secret_share = curve.encoding.encode_scalar(secret_share.value)
+        hiding_nonce = generate_nonce(encoded_secret_share, hashing)
+        binding_nonce = generate_nonce(encoded_secret_share, hashing)
 
-        self._nonce_pair = (hiding_nonce, binding_nonce)
+        hiding_nonce_commitment = curve.extended_to_affine(curve.scalar_mult(hiding_nonce, None)) # None means base point
+        binding_nonce_commitment = curve.extended_to_affine(curve.scalar_mult(binding_nonce, None))
 
-        return NonceCommitment(self.participant_id, hiding_nonce_commitment, binding_nonce_commitment)
+        return (hiding_nonce, binding_nonce), NonceCommitment(secret_share.index, hiding_nonce_commitment, binding_nonce_commitment)
 
-    def _sign(self, message: bytes, commitments: list[NonceCommitment]) -> SecretValue:
-        if self._nonce_pair is None:
-            raise ValueError("participant must commit before signing")
+    @staticmethod
+    def _sign(message: bytes, commitments: list[NonceCommitment], secret_share: SecretShare, nonce_pair: Tuple[int, int], group_info: GroupInfo, curve: EdwardsCurve, hashing: FrostHashing) -> SecretValue:
+        binding_factors = compute_binding_factors(group_info.group_public_key, commitments, message, hashing, curve.encoding)
+        binding_factor = binding_factor_for_participant(secret_share.index, binding_factors)
 
-        binding_factors = compute_binding_factors(self.group_info.group_public_key, commitments, message, self.hashing, self.curve.encoding)
-        binding_factor = binding_factor_for_participant(self.participant_id, binding_factors)
-
-        group_commitment = compute_group_commitment(commitments, binding_factors, self.curve)
+        group_commitment = compute_group_commitment(commitments, binding_factors, curve)
 
         participants = participants_from_commitment_list(commitments)
         # Potentially implemenet reuse logic
-        lambda_i = derive_interpolating_value(participants, self.participant_id, 0, self.curve.scalar_ops)
+        lambda_i = derive_interpolating_value(participants, secret_share.index, 0, curve.scalar_ops)
 
-        challenge = compute_challenge(group_commitment, self.group_info.group_public_key, message, self.hashing, self.curve.encoding)
+        challenge = compute_challenge(group_commitment, group_info.group_public_key, message, hashing, curve.encoding)
 
-        hiding_nonce, binding_nonce = self._nonce_pair
-        signature_share = hiding_nonce + (binding_nonce * binding_factor) + (lambda_i * self.secret_share.value * challenge)
+        hiding_nonce, binding_nonce = nonce_pair
+        signature_share = hiding_nonce + (binding_nonce * binding_factor) + (lambda_i * secret_share.value * challenge)
 
-        return self.curve.scalar_ops.reduce(signature_share)
+        return curve.scalar_ops.reduce(signature_share)
