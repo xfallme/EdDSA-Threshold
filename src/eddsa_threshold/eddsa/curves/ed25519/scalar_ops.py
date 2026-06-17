@@ -6,3 +6,7 @@ class Ed25519ScalarOps(ScalarOps):
     @property
     def order(self) -> int:
         return L
+    
+    @property
+    def identity(self) -> int:
+        return 0

@@ -32,7 +32,7 @@ def derive_interpolating_value(L: list[int], x_i: int, x: int, scalar_ops: Scala
     for x_j in L:
         if x_j == x_i:
             continue
-        numerator = scalar_ops.mul(numerator, scalar_ops.sub(x, x_j))
-        denominator = scalar_ops.mul(denominator, scalar_ops.sub(x_i, x_j))
+        numerator = numerator * (x - x_j)
+        denominator = denominator * (x_i - x_j)
 
-    return scalar_ops.mul(numerator, scalar_ops.inv(denominator))
+    return scalar_ops.reduce(numerator * scalar_ops.inv(scalar_ops.reduce(denominator)))

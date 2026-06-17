@@ -35,10 +35,10 @@ class ShamirSecretSharing(SecretSharing):
         if len(shares) < self.t:
             raise ValueError("Not enough shares to reconstruct the secret")
 
-        secret = 0
+        secret = self.scalar_ops.identity
         for share_i in shares:
             # Add share_i contribution to the secret
             lagrange_coeff = derive_interpolating_value([share_j.index for share_j in shares], share_i.index, 0, self.scalar_ops)
-            secret = self.scalar_ops.add(secret, self.scalar_ops.mul(share_i.value, lagrange_coeff))
+            secret += share_i.value * lagrange_coeff
 
-        return secret
+        return self.scalar_ops.reduce(secret)
