@@ -5,6 +5,7 @@ from typing import Tuple
 ParticipantId = int
 SessionId = int
 SecretValue = int
+VSSCommitment = Tuple
 
 
 @dataclass(frozen=True)
@@ -16,7 +17,7 @@ class SecretShare:
 @dataclass(frozen=True)
 class GroupInfo:
     group_public_key: bytes
-    public_keys: dict[ParticipantId, Tuple[int, int]]
+    public_keys: dict[ParticipantId, bytes]
 
 
 @dataclass(frozen=True)

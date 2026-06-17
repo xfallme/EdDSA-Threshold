@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from eddsa_threshold.eddsa.curves.base.scalar_ops import ScalarOps
 from eddsa_threshold.frost.core.polynomial import evaluate_polynomial, derive_interpolating_value
 from eddsa_threshold.frost.core.secrets.secret_sharing import SecretSharing
@@ -10,7 +12,7 @@ class ShamirSecretSharing(SecretSharing):
         self.n = num_shares
         self.scalar_ops = scalar_ops
 
-    def split(self, secret: int) -> list[SecretShare]:
+    def split(self, secret: int) -> Tuple[list[SecretShare], list[int]]:
         """
         Split the secret into n shares with a threshold of t.
         Uses Shamir's Secret Sharing with random coefficients.
@@ -25,7 +27,7 @@ class ShamirSecretSharing(SecretSharing):
             secret_key_share_i = evaluate_polynomial(coeffs, i, self.scalar_ops)
             shares.append(SecretShare(i, secret_key_share_i))
 
-        return shares
+        return shares, coeffs
 
     def reconstruct(self, shares: list[SecretShare]) -> int:
         """

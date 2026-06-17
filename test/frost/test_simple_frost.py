@@ -24,27 +24,35 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
 
     curve = curve_con()
     
-    trusted_dealer = FrostTrustedDealer.from_private_bytes(vector.group_secret_key, vector.MIN_PARTICIPANTS, vector.participant_list, hashing_con(), curve_con())
+    # normally the trusted dealer would not return these values, but we intercept them here for testing purposes to check against the test vectors
+    pytest_container: dict = {
+        "shares": [],
+        "group_info": None,
+        "vss_commitment": []
+    }
+    test_connections = {1: lambda share, group_info, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, group_info, vss_commitment), 2: lambda share, group_info, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, group_info, vss_commitment), 3: lambda share, group_info, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, group_info, vss_commitment)}
+    
+    trusted_dealer = FrostTrustedDealer.from_private_bytes(vector.group_secret_key, vector.MIN_PARTICIPANTS, vector.participant_list, test_connections, hashing_con(), curve_con())
     mocker.patch('eddsa_threshold.eddsa.curves.base.scalar_ops.ScalarOps.random_scalar', return_value=vector.share_polynomial_coefficients[1])
-    shares, group_info, vss_commitments = trusted_dealer.keygen()
+    trusted_dealer.keygen()
 
     # This block checks secret sharing outputs against test vectors
-    assert group_info.group_public_key == bytes.fromhex(vector.group_public_key_expected)
-    assert shares[0].index == 1
-    assert shares[0].value == vector.participant_shares[1]
-    assert shares[1].index == 2
-    assert shares[1].value == vector.participant_shares[2]
-    assert shares[2].index == 3
-    assert shares[2].value == vector.participant_shares[3]
+    assert pytest_container["group_info"].group_public_key == bytes.fromhex(vector.group_public_key_expected)
+    assert pytest_container["shares"][0].index == 1
+    assert pytest_container["shares"][0].value == vector.participant_shares[1]
+    assert pytest_container["shares"][1].index == 2
+    assert pytest_container["shares"][1].value == vector.participant_shares[2]
+    assert pytest_container["shares"][2].index == 3
+    assert pytest_container["shares"][2].value == vector.participant_shares[3]
 
-    coordinator = FrostCoordinator(vector.MIN_PARTICIPANTS, vector.participant_list, group_info, hashing_con(), curve_con())
+    coordinator = FrostCoordinator(vector.MIN_PARTICIPANTS, vector.participant_list, pytest_container["group_info"], hashing_con(), curve_con())
     
     session_id = coordinator.create_signing_session(m)
     
     # This test acts as distributor for the participants, in a real implementation this would be done out-of-band
-    p1 = FrostParticipant(1, shares[0], group_info, hashing_con(), curve_con())
-    p2 = FrostParticipant(2, shares[1], group_info, hashing_con(), curve_con())
-    p3 = FrostParticipant(3, shares[2], group_info, hashing_con(), curve_con())
+    p1 = FrostParticipant(1, pytest_container["shares"][0], pytest_container["group_info"], hashing_con(), curve_con())
+    p2 = FrostParticipant(2, pytest_container["shares"][1], pytest_container["group_info"], hashing_con(), curve_con())
+    p3 = FrostParticipant(3, pytest_container["shares"][2], pytest_container["group_info"], hashing_con(), curve_con())
     
     coordinator.register_participant_to_session(session_id, 1)
     coordinator.register_participant_to_session(session_id, 3)
@@ -56,7 +64,7 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
     c3 = p3.round_one_commit(session_id)
 
     commitments = [c1, c3]
-    binding_factors = compute_binding_factors(group_info.group_public_key, commitments, m, hashing_con(), curve_con().encoding)
+    binding_factors = compute_binding_factors(pytest_container["group_info"].group_public_key, commitments, m, hashing_con(), curve_con().encoding)
 
     # This block checks round one outputs against test vectors
     assert c1.participant_id == 1
@@ -86,11 +94,26 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
     assert s3 == vector.sig_share[3]
     assert sig == bytes.fromhex(vector.sig_expected)
 
-    is_valid = verifier(sig, m, group_info.group_public_key)
+    is_valid = verifier(sig, m, pytest_container["group_info"].group_public_key)
     assert is_valid, "Signature verification failed"
     
     print("\n" + vector.alg)
     print("Running test with 2 out of 3")
     print("Message:", m.hex())
-    print("Group Public Key:", group_info.group_public_key.hex())
+    print("Group Public Key:", pytest_container["group_info"].group_public_key.hex())
     print("Signature:", sig.hex())
+
+def _intercept_trusted_dealer_keygen(pytest_container, share, group_info, vss_commitment):
+    if pytest_container["group_info"] is None:
+        pytest_container["group_info"] = group_info
+    else:
+        if pytest_container["group_info"] != group_info:
+            raise ValueError("Group info mismatch between participants")
+
+    if len(pytest_container["vss_commitment"]) == 0:
+        pytest_container["vss_commitment"] = vss_commitment
+    else:
+        if pytest_container["vss_commitment"] != vss_commitment:
+            raise ValueError("VSS commitment mismatch between participants")
+    
+    pytest_container["shares"].append(share)
