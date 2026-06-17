@@ -4,14 +4,14 @@ version = "0.2.0"
 description = "Educational EdDSA and FROST implementations"
 readme = "README.md"
 license = "0BSD"
-requires-python = ">=3.10"
-dependencies = ["pynacl>=1.5.0"]
+requires-python = ">=3.14"
+dependencies = ["pynacl>=1.6.2"]
 
 [project.optional-dependencies]
 dev = [
-	"black>=26.3",
-	"mypy>=2.0",
-	"pytest>=9.0",
+	"black>=26.5",
+	"mypy>=2.1",
+	"pytest>=9.1",
 	"pytest-cases>=3.10",
 	"pytest-mock>=3.15",
 	"ruff>=0.15",
@@ -25,11 +25,11 @@ max_line_length = 160
 
 [tool.black]
 line-length = 160
-target-version = ["py310"]
+target-version = ["py314"]
 
 [tool.mypy]
-python_version = "3.10"
-files = ["src/eddsa_threshhold"]
+python_version = "3.14"
+files = ["src/eddsa_threshold"]
 mypy_path = ["src"]
 
 [tool.pytest.ini_options]
