@@ -35,13 +35,16 @@ class FrostTrustedDealer:
         vss_commitment = self._vss_commit(coeffs, self.curve)
         group_info = self._derive_group_info(self.threshold, len(self.participant_ids), vss_commitment, self.curve)
         
-        self.seed = -1  # clear seed from memory after key generation, MUST not be reused for another keygen session
-        
         for participant_id, share in zip(self.participant_ids, shares):
             if participant_id in self.participant_connections:
                 self.participant_connections[participant_id](share, group_info, vss_commitment)
             else:
                 raise ValueError(f"No connection provided for participant {participant_id}")
+            
+        # clear seed, shares, coeffs from memory after key generation, MUST not be reused for another keygen session
+        self.seed = -1
+        shares.clear()
+        coeffs.clear()
     
     @classmethod
     def from_private_bytes(cls, seed: int, threshold: int, participant_ids: list[ParticipantId], participant_connections: dict[ParticipantId, Callable[[SecretShare, GroupInfo, list[VSSCommitment]], None]], hashing: FrostHashing, curve: EdwardsCurve) -> FrostTrustedDealer: 
@@ -55,14 +58,14 @@ class FrostTrustedDealer:
         return cls(seed, threshold, participant_ids, participant_connections, hashing, curve)
     
     @staticmethod
-    def _derive_group_info(MIN_PARTICIPANTS: int, MAX_PARTICIPANTS: int, vss_commitment: list[VSSCommitment], curve: EdwardsCurve) -> GroupInfo:
+    def _derive_group_info(threshold: int, participant_count: int, vss_commitment: list[VSSCommitment], curve: EdwardsCurve) -> GroupInfo:
         group_public_key = curve.encode_extended_point(vss_commitment[0])  # the first commitment is the group public key
         
         participant_public_keys: dict[ParticipantId, bytes] = {}
         
-        for i in range(1, MAX_PARTICIPANTS + 1):
+        for i in range(1, participant_count + 1):
             participant_i_pk = (0, 1, 1, 0)
-            for j in range(0, MIN_PARTICIPANTS):
+            for j in range(0, threshold):
                 participant_i_pk = curve.add(curve.scalar_mult(pow(i, j), vss_commitment[j]), participant_i_pk)
             participant_public_keys[i] = curve.encode_extended_point(participant_i_pk)
         return GroupInfo(group_public_key, participant_public_keys)

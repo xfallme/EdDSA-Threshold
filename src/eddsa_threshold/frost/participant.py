@@ -2,7 +2,7 @@ from typing import Tuple
 
 from eddsa_threshold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshold.frost.core.base.frost_hashing import FrostHashing
-from eddsa_threshold.frost.core.frost_types import GroupInfo, NonceCommitment, ParticipantId, SecretShare, SecretValue, SessionId, SigningPackage
+from eddsa_threshold.frost.core.frost_types import GroupInfo, NonceCommitment, ParticipantId, SecretShare, SecretValue, SessionId, SigningPackage, VSSCommitment
 from eddsa_threshold.frost.core.polynomial import derive_interpolating_value
 from eddsa_threshold.frost.core.util import binding_factor_for_participant, compute_binding_factors, compute_challenge, compute_group_commitment, generate_nonce, participants_from_commitment_list
 
@@ -15,15 +15,24 @@ class FrostParticipant:
     """
 
     # EdwardsCurve for now, because this project only implements FROST for EdDSA, but this can be made more generic if needed.
-    def __init__(self, participant_id: ParticipantId, secret_key_share: SecretShare, group_info: GroupInfo, hashing: FrostHashing, curve: EdwardsCurve):
+    def __init__(self, participant_id: ParticipantId, threshold: int, hashing: FrostHashing, curve: EdwardsCurve):
         self.participant_id = participant_id
-        self.secret_share = secret_key_share
-        self.group_info = group_info
+        self.threshold = threshold
 
         self.hashing = hashing
         self.curve = curve
 
         self._nonce_pair: dict[SessionId, Tuple[int, int]] = dict()  # store nonce pairs for active signing sessions, cleared after signing is complete
+        
+    def set_and_verify_dealer_info(self, secret_share: SecretShare, group_info: GroupInfo, vss_commitment: list[VSSCommitment]):
+        """
+        Set the participant's secret share and group info after receiving and verifying them from the trusted dealer.
+        """
+        if not self._vss_verify(self.threshold, secret_share, vss_commitment, self.curve):
+            raise ValueError(f"VSS verification failed for the received secret share and VSS commitment for participant {self.participant_id}")
+        
+        self.secret_share = secret_share
+        self.group_info = group_info
 
     def round_one_commit(self, session_id: SessionId) -> NonceCommitment:
         """
@@ -31,7 +40,7 @@ class FrostParticipant:
         """
         
         if session_id in self._nonce_pair:
-            raise ValueError("participant has already committed to this signing session")
+            raise ValueError(f"participant {self.participant_id} has already committed to this signing session")
         
         nonce_pair, commitment = self._commit(self.secret_share, self.curve, self.hashing)
         self._nonce_pair[session_id] = nonce_pair
@@ -44,7 +53,7 @@ class FrostParticipant:
         """
         
         if signing_package.session_id not in self._nonce_pair:
-            raise ValueError("participant must commit to this signing session before signing")
+            raise ValueError(f"participant {self.participant_id} must commit to this signing session before signing")
         
         nonce_pair = self._nonce_pair[signing_package.session_id]
         signature_share = self._sign(signing_package.message, list(signing_package.commitments.values()), self.secret_share, nonce_pair, self.group_info, self.curve, self.hashing)
@@ -81,3 +90,16 @@ class FrostParticipant:
         signature_share = hiding_nonce + (binding_nonce * binding_factor) + (lambda_i * secret_share.value * challenge)
 
         return curve.scalar_ops.reduce(signature_share)
+    
+    @staticmethod
+    def _vss_verify(threshold: int, secret_share: SecretShare, vss_commitment: list[VSSCommitment], curve: EdwardsCurve) -> bool:
+        """
+        Verify a participant's secret share against the VSS commitment.
+        """
+        
+        S = curve.scalar_mult(secret_share.value, None)
+        S_ = (0, 1, 1, 0)  # identity point in extended coordinates
+        for i in range(0, threshold):
+            S_ = curve.add(S_, curve.scalar_mult(pow(secret_share.index, i), vss_commitment[i]))
+            
+        return curve.extended_to_affine(S) == curve.extended_to_affine(S_)
