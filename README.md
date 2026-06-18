@@ -1,7 +1,8 @@
 # EdDSA (Threshold)
 
 > [!CAUTION]
-> This project is a strictly educational implementation of the EdDSA standard and FROST algorithm - NOT PRODUCTION READY
+> This project is a strictly educational implementation of the EdDSA standard and FROST algorithm. This means it is NOT PRODUCTION READY at the moment. 
+> And will likely never be.
 
 This repository contains two different but linked implementations. The first is a "normal" single- party DSA, in this case EdDSA. The second is a multi-party threshold signature scheme, namely FROST.
 
