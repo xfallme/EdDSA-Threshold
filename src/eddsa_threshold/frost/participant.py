@@ -75,6 +75,10 @@ class FrostParticipant:
         return signature_share
 
     def _commit(self) -> Tuple[Tuple[int, int], NonceCommitment]:
+        """
+        Generates a nonce pair and the corresponding commitment for round 1 of FROST signing.
+        """
+        
         encoded_secret_share = self._CURVE.encoding.encode_scalar(self._SECRET_SHARE.value)
         hiding_nonce = self._generate_nonce(encoded_secret_share)
         binding_nonce = self._generate_nonce(encoded_secret_share)
@@ -85,6 +89,10 @@ class FrostParticipant:
         return (hiding_nonce, binding_nonce), NonceCommitment(self._SECRET_SHARE.index, hiding_nonce_commitment, binding_nonce_commitment)
 
     def _sign(self, session_id: SessionId, message: bytes, commitments: list[NonceCommitment]) -> SecretValue:
+        """
+        Generates a signature share for round 2 of FROST signing given the signing package from the coordinator.
+        """
+        
         nonce_pair = self._nonce_pair[session_id]
 
         binding_factors = compute_binding_factors(self._GROUP_INFO.group_public_key, commitments, message, self._HASHING, self._CURVE.encoding)

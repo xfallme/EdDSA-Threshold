@@ -5,6 +5,7 @@ def evaluate_polynomial(coeffs: list[int], x: int, scalar_ops: ScalarOps) -> int
     """
     Evaluates a polynomial at a given x using Horner's method.
     """
+    
     # https://en.wikipedia.org/wiki/Horner's_method
     result = 0
     for coeff in reversed(coeffs):

@@ -55,6 +55,10 @@ class FrostTrustedDealer:
         return cls(seed, threshold, participant_ids, participant_connections, curve)
     
     def _vss_commit(self, coeffs: list[int]) -> list[VSSCommitment]:
+        """
+        Generates a VSS commitment from the given polynomial coefficients.
+        """
+        
         vss_commitment = []
         
         for coeff in coeffs:

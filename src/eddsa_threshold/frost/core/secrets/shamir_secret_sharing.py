@@ -12,6 +12,7 @@ class ShamirSecretSharing(SecretSharing):
         Split the secret into N shares with a threshold of T.
         Uses Shamir's Secret Sharing with random coefficients.
         """
+        
         # Generate random coefficients for the polynomial f(x) = secret + a1*x + a2*x^2 + ... + a_{T-1}*x^{T-1}
         # Uses .random_scalar(), NOT PRODUCTION SECURE, but fine for this project.
         coeffs = [secret] + [self.scalar_ops.random_scalar() for _ in range(1, self.T)]
@@ -27,6 +28,7 @@ class ShamirSecretSharing(SecretSharing):
         """
         Reconstruct the secret from at least T shares using Lagrange interpolation.
         """
+        
         if len(shares) < self.T:
             raise ValueError("Not enough shares to reconstruct the secret")
 

@@ -11,6 +11,7 @@ def encode_group_commitments(commitments: list[NonceCommitment], encoding: Encod
     """
     Encodes a list of NonceCommitments into bytes.
     """
+    
     # Sort by participant id for deterministic encoding
     group_commitments = sorted(commitments, key=lambda c: c.participant_id)
 
@@ -28,6 +29,7 @@ def compute_binding_factors(group_public_key: bytes, commitments: list[NonceComm
     """
     Computes the binding factors for a signing session given the group public key, the list of NonceCommitments, and the message.
     """
+    
     message_hash = hashing.h4(message)
     encoded_commitments_hash = hashing.h5(encode_group_commitments(commitments, encoding))
 
@@ -45,6 +47,7 @@ def binding_factor_for_participant(participant_id: ParticipantId, binding_factor
     """
     Retrieves the binding factor for a given participant id from a list of BindingFactors.
     """
+    
     for factor in binding_factors:
         if factor.participant_id == participant_id:
             return factor.binding_factor
@@ -57,6 +60,7 @@ def compute_group_commitment(commitments: list[NonceCommitment], binding_factors
     """
     Computes the group commitment from a list of NonceCommitments and BindingFactors.
     """
+    
     group_commitment = (0, 1, 1, 0)  # Neutral element in extended coordinates
 
     for commitment in commitments:
@@ -73,6 +77,7 @@ def check_participant_bounds(threshold: int, participant_ids: list[ParticipantId
     """
     Checks that participant ids are within valid bounds
     """
+    
     if threshold <= 0:
         raise ValueError("threshold must be positive")
     if len(participant_ids) < threshold:
@@ -88,6 +93,10 @@ def check_participant_bounds(threshold: int, participant_ids: list[ParticipantId
 
 
 def derive_group_info(threshold: int, max_participants: int, vss_commitment: list[VSSCommitment], curve: EdwardsCurve) -> GroupInfo:
+    """
+    Derives the group public key and participant public keys from the VSS commitment.
+    """
+    
     group_public_key = curve.encode_extended_point(vss_commitment[0])  # the first commitment is the group public key
 
     participant_public_keys: dict[ParticipantId, bytes] = {}
