@@ -38,7 +38,7 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
     
     test_connections = {1: lambda share, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, vss_commitment, p1), 2: lambda share, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, vss_commitment, p2), 3: lambda share, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, vss_commitment, p3)}
     
-    trusted_dealer = FrostTrustedDealer.from_private_bytes(vector.group_secret_key, vector.MIN_PARTICIPANTS, vector.participant_list, test_connections, hashing_con(), curve_con())
+    trusted_dealer = FrostTrustedDealer.from_private_bytes(vector.group_secret_key, vector.MIN_PARTICIPANTS, vector.participant_list, test_connections, curve_con())
     mocker.patch('eddsa_threshold.eddsa.curves.base.scalar_ops.ScalarOps.random_scalar', return_value=vector.share_polynomial_coefficients[1])
     trusted_dealer.keygen()
     
@@ -62,7 +62,7 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
     coordinator.register_participant_to_session(session_id, 3)
     coordinator.start_signing_session(session_id)
 
-    mocker.patch('eddsa_threshold.frost.core.util.os.urandom', side_effect=[bytes.fromhex(vector.hiding_nonce_randomness[1]), bytes.fromhex(vector.binding_nonce_randomness[1]), bytes.fromhex(vector.hiding_nonce_randomness[3]), bytes.fromhex(vector.binding_nonce_randomness[3])])
+    mocker.patch('eddsa_threshold.frost.participant.os.urandom', side_effect=[bytes.fromhex(vector.hiding_nonce_randomness[1]), bytes.fromhex(vector.binding_nonce_randomness[1]), bytes.fromhex(vector.hiding_nonce_randomness[3]), bytes.fromhex(vector.binding_nonce_randomness[3])])
     c1 = p1.round_one_commit(session_id)
     # c2 = p2.round_one_commit()
     c3 = p3.round_one_commit(session_id)
@@ -109,9 +109,9 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
 
 def _intercept_trusted_dealer_keygen(pytest_container, share: SecretShare, vss_commitment: list[VSSCommitment], participant: FrostParticipant):
     if pytest_container["group_info"] is None:
-        pytest_container["group_info"] = derive_group_info(participant.threshold, participant.max_participants, vss_commitment, participant.curve)
+        pytest_container["group_info"] = derive_group_info(participant.THRESHOLD, participant.MAX_PARTICIPANTS, vss_commitment, participant._CURVE)
     else:
-        if pytest_container["group_info"] != derive_group_info(participant.threshold, participant.max_participants, vss_commitment, participant.curve):
+        if pytest_container["group_info"] != derive_group_info(participant.THRESHOLD, participant.MAX_PARTICIPANTS, vss_commitment, participant._CURVE):
             raise ValueError("Group info mismatch between participants")
 
     if len(pytest_container["vss_commitment"]) == 0:

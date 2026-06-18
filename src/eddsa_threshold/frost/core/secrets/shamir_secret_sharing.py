@@ -7,23 +7,17 @@ from eddsa_threshold.frost.core.frost_types import SecretShare
 
 
 class ShamirSecretSharing(SecretSharing):
-    def __init__(self, threshold: int, num_shares: int, scalar_ops: ScalarOps):
-        self.t = threshold
-        self.n = num_shares
-        self.scalar_ops = scalar_ops
-
     def split(self, secret: int) -> Tuple[list[SecretShare], list[int]]:
         """
-        Split the secret into n shares with a threshold of t.
+        Split the secret into N shares with a threshold of T.
         Uses Shamir's Secret Sharing with random coefficients.
         """
-
-        # Generate random coefficients for the polynomial f(x) = secret + a1*x + a2*x^2 + ... + a_{t-1}*x^{t-1}
+        # Generate random coefficients for the polynomial f(x) = secret + a1*x + a2*x^2 + ... + a_{T-1}*x^{T-1}
         # Uses .random_scalar(), NOT PRODUCTION SECURE, but fine for this project.
-        coeffs = [secret] + [self.scalar_ops.random_scalar() for _ in range(1, self.t)]
+        coeffs = [secret] + [self.scalar_ops.random_scalar() for _ in range(1, self.T)]
 
         shares = []
-        for i in range(1, self.n + 1):
+        for i in range(1, self.N + 1):
             secret_key_share_i = evaluate_polynomial(coeffs, i, self.scalar_ops)
             shares.append(SecretShare(i, secret_key_share_i))
 
@@ -31,10 +25,9 @@ class ShamirSecretSharing(SecretSharing):
 
     def reconstruct(self, shares: list[SecretShare]) -> int:
         """
-        Reconstruct the secret from at least t shares using Lagrange interpolation.
+        Reconstruct the secret from at least T shares using Lagrange interpolation.
         """
-
-        if len(shares) < self.t:
+        if len(shares) < self.T:
             raise ValueError("Not enough shares to reconstruct the secret")
 
         secret = self.scalar_ops.identity

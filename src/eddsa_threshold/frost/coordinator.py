@@ -1,3 +1,5 @@
+from typing import Final
+
 from eddsa_threshold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshold.frost.core.base.frost_hashing import FrostHashing
 from eddsa_threshold.frost.core.frost_types import GroupInfo, NonceCommitment, ParticipantId, SecretValue, SessionId, SigningPackage, SigningSession
@@ -17,12 +19,13 @@ class FrostCoordinator:
 
         check_participant_bounds(threshold, participant_ids, curve.scalar_ops)
 
-        self.threshold = threshold
-        self.participant_ids = participant_ids
-        self.group_info = group_info
+        self.THRESHOLD: Final[int] = threshold
+        self.PARTICIPANT_IDS: Final[list[ParticipantId]] = participant_ids
+        self.MAX_PARTICIPANTS: Final[int] = len(participant_ids)
+        self.GROUP_INFO: Final[GroupInfo] = group_info
 
-        self.hashing = hashing
-        self.curve = curve
+        self._HASHING: Final[FrostHashing] = hashing
+        self._CURVE: Final[EdwardsCurve] = curve
 
         self._signing_sessions: dict[SessionId, SigningSession] = {}
 
@@ -32,7 +35,7 @@ class FrostCoordinator:
         """
 
         # for now, session id is a hash of the message + randomness (allow for multiple signing sessions for the same message)
-        session_id = self.hashing.h2(message) + self.curve.scalar_ops.random_scalar()
+        session_id = self._HASHING.h2(message) + self._CURVE.scalar_ops.random_scalar()
 
         signing_session = SigningSession(session_id, message)
         self._signing_sessions[session_id] = signing_session
@@ -52,7 +55,7 @@ class FrostCoordinator:
         if signing_session.signing_in_progress:
             raise ValueError("cannot register participant to session after signing has started")
 
-        if participant_id not in self.participant_ids:
+        if participant_id not in self.PARTICIPANT_IDS:
             raise ValueError("participant id not recognized")
 
         if participant_id in signing_session.participant_ids:
@@ -70,7 +73,7 @@ class FrostCoordinator:
 
         signing_session = self._signing_sessions[session_id]
 
-        if len(signing_session.participant_ids) < self.threshold:
+        if len(signing_session.participant_ids) < self.THRESHOLD:
             raise ValueError("not enough participants registered to start signing session")
 
         signing_session.signing_in_progress = True
@@ -154,14 +157,14 @@ class FrostCoordinator:
         commitments = list(signing_session.commitments.values())
         signature_shares = list(signing_session.signature_shares.values())
 
-        binding_factors = compute_binding_factors(self.group_info.group_public_key, commitments, signing_session.message, self.hashing, self.curve.encoding)
+        binding_factors = compute_binding_factors(self.GROUP_INFO.group_public_key, commitments, signing_session.message, self._HASHING, self._CURVE.encoding)
 
-        group_commitment = compute_group_commitment(commitments, binding_factors, self.curve)
+        group_commitment = compute_group_commitment(commitments, binding_factors, self._CURVE)
 
         z = 0
         for z_i in signature_shares:
             z = z + z_i
 
-        z = self.curve.scalar_ops.reduce(z)
+        z = self._CURVE.scalar_ops.reduce(z)
 
-        return self.curve.encoding.encode_point(group_commitment) + self.curve.encoding.encode_scalar(z)
+        return self._CURVE.encoding.encode_point(group_commitment) + self._CURVE.encoding.encode_scalar(z)

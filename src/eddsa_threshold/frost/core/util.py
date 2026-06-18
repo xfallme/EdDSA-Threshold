@@ -1,5 +1,4 @@
 from typing import Tuple
-import os
 
 from eddsa_threshold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshold.eddsa.curves.base.encoding import Encoding

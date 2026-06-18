@@ -16,13 +16,13 @@ def test_basic_shamir_secret_sharing(scalar_ops: ScalarOps):
     shares = sss.split(secret)
 
     # Test that we can't reconstruct the secret from fewer than t shares
-    for i in range(1, sss.t):
+    for i in range(1, sss.T):
         for subset in combinations(shares, i):
             with pytest.raises(ValueError):
                 reconstructed = sss.reconstruct(list(subset))
 
     # Test that we can reconstruct the secret from any t+ shares
-    for i in range(sss.t, sss.n + 1):
+    for i in range(sss.T, sss.N + 1):
         for subset in combinations(shares, i):
             reconstructed = sss.reconstruct(list(subset))
             assert reconstructed == secret, f"Failed to reconstruct secret from shares: {subset}"
