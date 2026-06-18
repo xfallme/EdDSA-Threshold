@@ -5,7 +5,7 @@ from eddsa_threshold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshold.frost.core.base.frost_hashing import FrostHashing
 from eddsa_threshold.frost.core.frost_types import GroupInfo, NonceCommitment, ParticipantId, SecretShare, SecretValue, SessionId, SigningPackage, VSSCommitment
 from eddsa_threshold.frost.core.polynomial import derive_interpolating_value
-from eddsa_threshold.frost.core.util import binding_factor_for_participant, compute_binding_factors, compute_group_commitment
+from eddsa_threshold.frost.core.util import binding_factor_for_participant, compute_binding_factors, compute_group_commitment, derive_group_info
 
 
 class FrostParticipant:
@@ -16,16 +16,17 @@ class FrostParticipant:
     """
 
     # EdwardsCurve for now, because this project only implements FROST for EdDSA, but this can be made more generic if needed.
-    def __init__(self, participant_id: ParticipantId, threshold: int, hashing: FrostHashing, curve: EdwardsCurve):
+    def __init__(self, participant_id: ParticipantId, threshold: int, max_participants: int, hashing: FrostHashing, curve: EdwardsCurve):
         self.participant_id = participant_id
         self.threshold = threshold
+        self.max_participants = max_participants
 
         self.hashing = hashing
         self.curve = curve
 
         self._nonce_pair: dict[SessionId, Tuple[int, int]] = dict()  # store nonce pairs for active signing sessions, cleared after signing is complete
 
-    def set_and_verify_dealer_info(self, secret_share: SecretShare, group_info: GroupInfo, vss_commitment: list[VSSCommitment]):
+    def set_and_verify_dealer_info(self, secret_share: SecretShare, vss_commitment: list[VSSCommitment]):
         """
         Set the participant's secret share and group info after receiving and verifying them from the trusted dealer.
         """
@@ -33,7 +34,7 @@ class FrostParticipant:
             raise ValueError(f"VSS verification failed for the received secret share and VSS commitment for participant {self.participant_id}")
 
         self.secret_share = secret_share
-        self.group_info = group_info
+        self.group_info = derive_group_info(self.threshold, self.max_participants, vss_commitment, self.curve)
 
     def round_one_commit(self, session_id: SessionId) -> NonceCommitment:
         """

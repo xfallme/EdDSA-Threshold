@@ -5,7 +5,7 @@ from eddsa_threshold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshold.eddsa.curves.base.encoding import Encoding
 from eddsa_threshold.eddsa.curves.base.scalar_ops import ScalarOps
 from eddsa_threshold.frost.core.base.frost_hashing import FrostHashing
-from eddsa_threshold.frost.core.frost_types import BindingFactor, NonceCommitment, ParticipantId
+from eddsa_threshold.frost.core.frost_types import BindingFactor, GroupInfo, NonceCommitment, ParticipantId, VSSCommitment
 
 
 def encode_group_commitments(commitments: list[NonceCommitment], encoding: Encoding) -> bytes:
@@ -18,7 +18,8 @@ def encode_group_commitments(commitments: list[NonceCommitment], encoding: Encod
     encoded_group_commitment = b""
 
     for commitment in group_commitments:
-        encoded_commitment = encoding.encode_scalar(commitment.participant_id) + encoding.encode_point(commitment.hiding_nonce_commitment) + encoding.encode_point(commitment.binding_nonce_commitment)
+        encoded_commitment = encoding.encode_scalar(commitment.participant_id) + encoding.encode_point(
+            commitment.hiding_nonce_commitment) + encoding.encode_point(commitment.binding_nonce_commitment)
         encoded_group_commitment = encoded_group_commitment + encoded_commitment
 
     return encoded_group_commitment
@@ -85,3 +86,16 @@ def check_participant_bounds(threshold: int, participant_ids: list[ParticipantId
     unique_ids = set(participant_ids)
     if len(unique_ids) != len(participant_ids):
         raise ValueError("participant ids must be unique")
+
+
+def derive_group_info(threshold: int, max_participants: int, vss_commitment: list[VSSCommitment], curve: EdwardsCurve) -> GroupInfo:
+    group_public_key = curve.encode_extended_point(vss_commitment[0])  # the first commitment is the group public key
+
+    participant_public_keys: dict[ParticipantId, bytes] = {}
+
+    for i in range(1, max_participants + 1):
+        participant_i_pk = (0, 1, 1, 0)
+        for j in range(0, threshold):
+            participant_i_pk = curve.add(curve.scalar_mult(pow(i, j), vss_commitment[j]), participant_i_pk)
+        participant_public_keys[i] = curve.encode_extended_point(participant_i_pk)
+    return GroupInfo(group_public_key, participant_public_keys)

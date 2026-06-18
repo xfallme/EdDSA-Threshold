@@ -7,7 +7,7 @@ from eddsa_threshold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshold.frost.core.base.frost_hashing import FrostHashing
 from eddsa_threshold.frost.trusted_dealer import FrostTrustedDealer
 from eddsa_threshold.frost.core.frost_types import GroupInfo, SecretShare, SigningPackage, VSSCommitment
-from eddsa_threshold.frost.core.util import binding_factor_for_participant, compute_binding_factors
+from eddsa_threshold.frost.core.util import binding_factor_for_participant, compute_binding_factors, derive_group_info
 from eddsa_threshold.frost.participant import FrostParticipant
 from eddsa_threshold.frost.coordinator import FrostCoordinator
 
@@ -32,11 +32,11 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
     }
     
     # This test acts as distributor for the participants, in a real implementation this would be done out-of-band
-    p1 = FrostParticipant(1, vector.MIN_PARTICIPANTS, hashing_con(), curve_con())
-    p2 = FrostParticipant(2, vector.MIN_PARTICIPANTS, hashing_con(), curve_con())
-    p3 = FrostParticipant(3, vector.MIN_PARTICIPANTS, hashing_con(), curve_con())
+    p1 = FrostParticipant(1, vector.MIN_PARTICIPANTS, vector.MAX_PARTICIPANTS, hashing_con(), curve_con())
+    p2 = FrostParticipant(2, vector.MIN_PARTICIPANTS, vector.MAX_PARTICIPANTS, hashing_con(), curve_con())
+    p3 = FrostParticipant(3, vector.MIN_PARTICIPANTS, vector.MAX_PARTICIPANTS, hashing_con(), curve_con())
     
-    test_connections = {1: lambda share, group_info, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, group_info, vss_commitment, p1), 2: lambda share, group_info, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, group_info, vss_commitment, p2), 3: lambda share, group_info, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, group_info, vss_commitment, p3)}
+    test_connections = {1: lambda share, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, vss_commitment, p1), 2: lambda share, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, vss_commitment, p2), 3: lambda share, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, vss_commitment, p3)}
     
     trusted_dealer = FrostTrustedDealer.from_private_bytes(vector.group_secret_key, vector.MIN_PARTICIPANTS, vector.participant_list, test_connections, hashing_con(), curve_con())
     mocker.patch('eddsa_threshold.eddsa.curves.base.scalar_ops.ScalarOps.random_scalar', return_value=vector.share_polynomial_coefficients[1])
@@ -107,11 +107,11 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
     print("Group Public Key:", group_info.group_public_key.hex())
     print("Signature:", sig.hex())
 
-def _intercept_trusted_dealer_keygen(pytest_container, share: SecretShare, group_info: GroupInfo, vss_commitment: list[VSSCommitment], participant: FrostParticipant):
+def _intercept_trusted_dealer_keygen(pytest_container, share: SecretShare, vss_commitment: list[VSSCommitment], participant: FrostParticipant):
     if pytest_container["group_info"] is None:
-        pytest_container["group_info"] = group_info
+        pytest_container["group_info"] = derive_group_info(participant.threshold, participant.max_participants, vss_commitment, participant.curve)
     else:
-        if pytest_container["group_info"] != group_info:
+        if pytest_container["group_info"] != derive_group_info(participant.threshold, participant.max_participants, vss_commitment, participant.curve):
             raise ValueError("Group info mismatch between participants")
 
     if len(pytest_container["vss_commitment"]) == 0:
@@ -122,4 +122,4 @@ def _intercept_trusted_dealer_keygen(pytest_container, share: SecretShare, group
     
     pytest_container["shares"].append(share)
     
-    participant.set_and_verify_dealer_info(share, group_info, vss_commitment)
+    participant.set_and_verify_dealer_info(share, vss_commitment)
