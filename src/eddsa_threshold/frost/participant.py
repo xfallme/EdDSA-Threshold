@@ -28,7 +28,7 @@ class FrostParticipant:
 
         self._nonce_pair: dict[SessionId, Tuple[int, int]] = dict()  # store nonce pairs for active signing sessions, cleared after signing is complete
 
-    def set_and_verify_dealer_info(self, secret_share: SecretShare, vss_commitment: list[VSSCommitment]):
+    def set_and_verify_dealer_info(self, secret_share: SecretShare, vss_commitment: list[VSSCommitment]) -> None:
         """
         Set the participant's secret share and group info after receiving and verifying them from the trusted dealer.
         """

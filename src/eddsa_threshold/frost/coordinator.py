@@ -2,8 +2,8 @@ from typing import Final
 
 from eddsa_threshold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshold.frost.core.base.frost_hashing import FrostHashing
-from eddsa_threshold.frost.core.frost_types import GroupInfo, NonceCommitment, ParticipantId, SecretValue, SessionId, SigningPackage, SigningSession
-from eddsa_threshold.frost.core.util import check_participant_bounds, compute_binding_factors, compute_group_commitment
+from eddsa_threshold.frost.core.frost_types import GroupInfo, NonceCommitment, ParticipantId, SecretValue, SessionId, SigningPackage, SigningSession, VSSCommitment
+from eddsa_threshold.frost.core.util import check_participant_bounds, compute_binding_factors, compute_group_commitment, derive_group_info
 
 
 class FrostCoordinator:
@@ -13,7 +13,7 @@ class FrostCoordinator:
     Cryptographic operations are delegated through callback hooks so this class can stay curve/algorithm agnostic.
     """
 
-    def __init__(self, threshold: int, participant_ids: list[ParticipantId], group_info: GroupInfo, hashing: FrostHashing, curve: EdwardsCurve):
+    def __init__(self, threshold: int, participant_ids: list[ParticipantId], hashing: FrostHashing, curve: EdwardsCurve):
         if threshold <= 0:
             raise ValueError("threshold must be positive")
 
@@ -22,17 +22,32 @@ class FrostCoordinator:
         self.THRESHOLD: Final[int] = threshold
         self.PARTICIPANT_IDS: Final[list[ParticipantId]] = participant_ids
         self.MAX_PARTICIPANTS: Final[int] = len(participant_ids)
-        self.GROUP_INFO: Final[GroupInfo] = group_info
+        
+        self._dealer_info_set: bool = False
 
         self._HASHING: Final[FrostHashing] = hashing
         self._CURVE: Final[EdwardsCurve] = curve
 
         self._signing_sessions: dict[SessionId, SigningSession] = {}
+        
+    def set_dealer_info(self, vss_commitment: list[VSSCommitment]) -> None:
+        """
+        Set the group info after receiving it from the trusted dealer.
+        """
+        
+        if self._dealer_info_set:
+            raise ValueError(f"coordinator has already set their dealer info")
+        
+        self._GROUP_INFO = derive_group_info(self.THRESHOLD, self.MAX_PARTICIPANTS, vss_commitment, self._CURVE)
+        self._dealer_info_set = True
 
     def create_signing_session(self, message: bytes) -> SessionId:
         """
         Initializes a signing session for the given message.
         """
+        
+        if not self._dealer_info_set:
+            raise ValueError("dealer info has not been set yet")
 
         # for now, session id is a hash of the message + randomness (allow for multiple signing sessions for the same message)
         session_id = self._HASHING.h2(message) + self._CURVE.scalar_ops.random_scalar()
@@ -157,7 +172,7 @@ class FrostCoordinator:
         commitments = list(signing_session.commitments.values())
         signature_shares = list(signing_session.signature_shares.values())
 
-        binding_factors = compute_binding_factors(self.GROUP_INFO.group_public_key, commitments, signing_session.message, self._HASHING, self._CURVE.encoding)
+        binding_factors = compute_binding_factors(self._GROUP_INFO.group_public_key, commitments, signing_session.message, self._HASHING, self._CURVE.encoding)
 
         group_commitment = compute_group_commitment(commitments, binding_factors, self._CURVE)
 

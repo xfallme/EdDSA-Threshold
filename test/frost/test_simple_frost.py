@@ -31,14 +31,17 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
         "vss_commitment": []
     }
     
-    # This test acts as distributor for the participants, in a real implementation this would be done out-of-band
+    # This test acts as distributor for the participants and coordinator, in a real implementation this would be done out-of-band
     p1 = FrostParticipant(1, vector.MIN_PARTICIPANTS, vector.MAX_PARTICIPANTS, hashing_con(), curve_con())
     p2 = FrostParticipant(2, vector.MIN_PARTICIPANTS, vector.MAX_PARTICIPANTS, hashing_con(), curve_con())
     p3 = FrostParticipant(3, vector.MIN_PARTICIPANTS, vector.MAX_PARTICIPANTS, hashing_con(), curve_con())
     
-    test_connections = {1: lambda share, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, vss_commitment, p1), 2: lambda share, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, vss_commitment, p2), 3: lambda share, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, vss_commitment, p3)}
+    coordinator = FrostCoordinator(vector.MIN_PARTICIPANTS, vector.participant_list, hashing_con(), curve_con())
     
-    trusted_dealer = FrostTrustedDealer.from_private_bytes(vector.group_secret_key, vector.MIN_PARTICIPANTS, vector.participant_list, test_connections, curve_con())
+    test_participant_connections = {1: lambda share, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, vss_commitment, p1), 2: lambda share, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, vss_commitment, p2), 3: lambda share, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, vss_commitment, p3)}
+    test_coordinator_connection = lambda vss_commitment: _intercept_trusted_dealer_keygen_coordinator(pytest_container, vss_commitment, coordinator)
+    
+    trusted_dealer = FrostTrustedDealer.from_private_bytes(vector.group_secret_key, vector.MIN_PARTICIPANTS, vector.participant_list, test_participant_connections, test_coordinator_connection, curve_con())
     mocker.patch('eddsa_threshold.eddsa.curves.base.scalar_ops.ScalarOps.random_scalar', return_value=vector.share_polynomial_coefficients[1])
     trusted_dealer.keygen()
     
@@ -53,8 +56,6 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
     assert shares[1].value == vector.participant_shares[2]
     assert shares[2].index == 3
     assert shares[2].value == vector.participant_shares[3]
-
-    coordinator = FrostCoordinator(vector.MIN_PARTICIPANTS, vector.participant_list, group_info, hashing_con(), curve_con())
     
     session_id = coordinator.create_signing_session(m)
     
@@ -123,3 +124,18 @@ def _intercept_trusted_dealer_keygen(pytest_container, share: SecretShare, vss_c
     pytest_container["shares"].append(share)
     
     participant.set_and_verify_dealer_info(share, vss_commitment)
+    
+def _intercept_trusted_dealer_keygen_coordinator(pytest_container, vss_commitment: list[VSSCommitment], coordinator: FrostCoordinator):
+    if pytest_container["group_info"] is None:
+        pytest_container["group_info"] = derive_group_info(coordinator.THRESHOLD, coordinator.MAX_PARTICIPANTS, vss_commitment, coordinator._CURVE)
+    else:
+        if pytest_container["group_info"] != derive_group_info(coordinator.THRESHOLD, coordinator.MAX_PARTICIPANTS, vss_commitment, coordinator._CURVE):
+            raise ValueError("Group info mismatch between participants and coordinator")
+
+    if len(pytest_container["vss_commitment"]) == 0:
+        pytest_container["vss_commitment"] = vss_commitment
+    else:
+        if pytest_container["vss_commitment"] != vss_commitment:
+            raise ValueError("VSS commitment mismatch between participants and coordinator")
+    
+    coordinator.set_dealer_info(vss_commitment)
