@@ -32,7 +32,7 @@ class FrostTrustedDealer:
 
         shares, coeffs = self.secret_sharing.split(self.seed)
 
-        vss_commitment = self._vss_commit(coeffs, self.curve)
+        vss_commitment = self._vss_commit(coeffs)
         group_info = self._derive_group_info(self.threshold, len(self.participant_ids), vss_commitment, self.curve)
         
         for participant_id, share in zip(self.participant_ids, shares):
@@ -70,12 +70,11 @@ class FrostTrustedDealer:
             participant_public_keys[i] = curve.encode_extended_point(participant_i_pk)
         return GroupInfo(group_public_key, participant_public_keys)
     
-    @staticmethod
-    def _vss_commit(coeffs: list[int], curve: EdwardsCurve) -> list[VSSCommitment]:
+    def _vss_commit(self, coeffs: list[int]) -> list[VSSCommitment]:
         vss_commitment = []
         
         for coeff in coeffs:
-            vss_i = curve.scalar_mult(coeff, None) 
+            vss_i = self.curve.scalar_mult(coeff, None) 
             vss_commitment.append(vss_i)
             
         return vss_commitment

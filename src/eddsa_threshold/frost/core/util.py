@@ -8,11 +8,6 @@ from eddsa_threshold.frost.core.base.frost_hashing import FrostHashing
 from eddsa_threshold.frost.core.frost_types import BindingFactor, NonceCommitment, ParticipantId
 
 
-def generate_nonce(secret: bytes, hashing: FrostHashing) -> int:
-    random = os.urandom(32)
-    return hashing.h3(random + secret)
-
-
 def encode_group_commitments(commitments: list[NonceCommitment], encoding: Encoding) -> bytes:
     """
     Encodes a list of NonceCommitments into bytes.
@@ -29,26 +24,10 @@ def encode_group_commitments(commitments: list[NonceCommitment], encoding: Encod
     return encoded_group_commitment
 
 
-def participants_from_commitment_list(commitments: list[NonceCommitment]) -> list[ParticipantId]:
-    """
-    Extracts the set of participant ids from a list of NonceCommitments.
-    """
-    return list(commitment.participant_id for commitment in commitments)
-
-
-def binding_factor_for_participant(participant_id: ParticipantId, binding_factors: list[BindingFactor]) -> int:
-    """
-    Retrieves the binding factor for a given participant id from a list of BindingFactors.
-    """
-    for factor in binding_factors:
-        if factor.participant_id == participant_id:
-            return factor.binding_factor
-
-    raise ValueError(f"binding factor not found for participant {participant_id}")
-
-
 def compute_binding_factors(group_public_key: bytes, commitments: list[NonceCommitment], message: bytes, hashing: FrostHashing, encoding: Encoding) -> list[BindingFactor]:
-
+    """
+    Computes the binding factors for a signing session given the group public key, the list of NonceCommitments, and the message.
+    """
     message_hash = hashing.h4(message)
     encoded_commitments_hash = hashing.h5(encode_group_commitments(commitments, encoding))
 
@@ -60,6 +39,17 @@ def compute_binding_factors(group_public_key: bytes, commitments: list[NonceComm
         binding_factor = hashing.h1(rho_input)
         binding_factors.append(BindingFactor(commitment.participant_id, binding_factor))
     return binding_factors
+
+
+def binding_factor_for_participant(participant_id: ParticipantId, binding_factors: list[BindingFactor]) -> int:
+    """
+    Retrieves the binding factor for a given participant id from a list of BindingFactors.
+    """
+    for factor in binding_factors:
+        if factor.participant_id == participant_id:
+            return factor.binding_factor
+
+    raise ValueError(f"binding factor not found for participant {participant_id}")
 
 
 # EdwardsCurve for now, because this project only implements FROST for EdDSA, but this can be made more generic if needed.
@@ -77,14 +67,6 @@ def compute_group_commitment(commitments: list[NonceCommitment], binding_factors
         group_commitment = curve.add(group_commitment, binding_nonce)
 
     return curve.extended_to_affine(group_commitment)
-
-
-def compute_challenge(group_commitment: Tuple, group_public_key: bytes, message: bytes, hashing: FrostHashing, encoding: Encoding) -> int:
-    """
-    Computes the signing challenge c = H(R || A || m) where R is the group commitment, A is the group public key, and m is the message.
-    """
-    challenge_input = encoding.encode_point(group_commitment) + group_public_key + message
-    return hashing.h2(challenge_input)
 
 
 def check_participant_bounds(threshold: int, participant_ids: list[ParticipantId], scalar_ops: ScalarOps) -> None:
