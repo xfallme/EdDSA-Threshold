@@ -13,8 +13,6 @@ jobs:
       permissions:
         contents: write
       steps:
-        - uses: actions/checkout@v6
-
         - name: Create Git tag for release
           env:
             VERSION: ${{ github.event.inputs.version }}
@@ -27,6 +25,11 @@ jobs:
                 ref: "refs/tags/v${{env.VERSION}}",
                 sha: context.sha
               })
+        
+        - uses: actions/checkout@v6
+          with:
+            fetch-depth: 0
+            fetch-tags: true
 
         - uses: actions/setup-python@v6
           with:
