@@ -52,6 +52,7 @@ jobs:
 
     environment:
       name: pypi
+      url: https://pypi.org/project/eddsa-threshold/
       
     steps:
       - name: Retrieve release distributions
