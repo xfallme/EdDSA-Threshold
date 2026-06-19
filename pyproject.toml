@@ -1,11 +1,24 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "eddsa-threshold"
 version = "0.2.0"
+authors = [
+	{ name = "Maximilian", email = "23641084+xfallme@users.noreply.github.com" },
+]
 description = "Educational EdDSA and FROST implementations"
 readme = "README.md"
 license = "0BSD"
 requires-python = ">=3.14"
 dependencies = []
+keywords = ["cryptography", "threshold", "eddsa", "frost"]
+
+[project.urls]
+Homepage = "https://github.com/xfallme/EdDSA-Threshold"
+Repository = "https://github.com/xfallme/EdDSA-Threshold"
+Issues = "https://github.com/xfallme/EdDSA-Threshold/issues"
 
 [project.optional-dependencies]
 dev = [
@@ -18,8 +31,12 @@ dev = [
 	"pynacl>=1.6.2",
 ]
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["eddsa_threshold*"]
 
 [tool.autopep8]
 max_line_length = 160
