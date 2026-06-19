@@ -1,10 +1,11 @@
 [build-system]
-requires = ["setuptools>=64"]
+requires = ["setuptools>=80", "setuptools-scm[simple]>=9.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "eddsa-threshold"
-version = "0.2.0.alpha1"
+# last manual version = "v0.2.0.alpha1"
+dynamic = ["version"]
 authors = [
 	{ name = "Maximilian", email = "23641084+xfallme@users.noreply.github.com" },
 ]
