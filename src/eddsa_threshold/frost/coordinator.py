@@ -168,6 +168,9 @@ class FrostCoordinator:
         
         if not signing_session.round_two_completed:
             raise ValueError("round two not completed yet")
+        
+        if signing_session.session_completed:
+            raise ValueError("session has already been completed and aggregated")
 
         commitments = list(signing_session.commitments.values())
         signature_shares = list(signing_session.signature_shares.values())
@@ -182,4 +185,9 @@ class FrostCoordinator:
 
         z = self._CURVE.scalar_ops.reduce(z)
 
-        return self._CURVE.encoding.encode_point(group_commitment) + self._CURVE.encoding.encode_scalar(z)
+        signature = self._CURVE.encoding.encode_point(group_commitment) + self._CURVE.encoding.encode_scalar(z)
+        
+        signing_session.signature_shares.clear()
+        signing_session.session_completed = True
+        
+        return signature

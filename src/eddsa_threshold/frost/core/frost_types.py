@@ -51,3 +51,4 @@ class SigningSession:
     signing_in_progress: bool = False
     round_one_completed: bool = False
     round_two_completed: bool = False
+    session_completed: bool = False
