@@ -1,7 +1,6 @@
 from typing import Callable, Final
 
 from eddsa_threshold.eddsa.curves.base.edwards_curve import EdwardsCurve
-from eddsa_threshold.frost.core.base.frost_hashing import FrostHashing
 from eddsa_threshold.frost.core.secrets.shamir_secret_sharing import ShamirSecretSharing
 from eddsa_threshold.frost.core.frost_types import ParticipantId, SecretShare, VSSCommitment
 from eddsa_threshold.frost.core.util import check_participant_bounds
@@ -48,9 +47,9 @@ class FrostTrustedDealer:
         coeffs.clear()
     
     @classmethod
-    def from_private_bytes(cls, seed: int, threshold: int, participant_ids: list[ParticipantId], participant_connections: dict[ParticipantId, Callable[[SecretShare, list[VSSCommitment]], None]], coordinator_connection: Callable[[list[VSSCommitment]], None], curve: EdwardsCurve) -> FrostTrustedDealer: 
+    def from_private_bytes(cls, seed: bytes, threshold: int, participant_ids: list[ParticipantId], participant_connections: dict[ParticipantId, Callable[[SecretShare, list[VSSCommitment]], None]], coordinator_connection: Callable[[list[VSSCommitment]], None], curve: EdwardsCurve) -> FrostTrustedDealer: 
         """Create a dealer instance from the given private seed bytes."""
-        return cls(seed, threshold, participant_ids, participant_connections, coordinator_connection, curve)
+        return cls(curve.encoding.decode_scalar(seed), threshold, participant_ids, participant_connections, coordinator_connection, curve)
 
     @classmethod
     def generate(cls, threshold: int, participant_ids: list[ParticipantId], participant_connections: dict[ParticipantId, Callable[[SecretShare, list[VSSCommitment]], None]], coordinator_connection: Callable[[list[VSSCommitment]], None], curve: EdwardsCurve) -> FrostTrustedDealer: 

@@ -41,7 +41,7 @@ def test_simple_frost(mocker, vector: SimpleNamespace, hashing_con: Callable[[],
     test_participant_connections = {1: lambda share, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, vss_commitment, p1), 2: lambda share, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, vss_commitment, p2), 3: lambda share, vss_commitment: _intercept_trusted_dealer_keygen(pytest_container, share, vss_commitment, p3)}
     test_coordinator_connection = lambda vss_commitment: _intercept_trusted_dealer_keygen_coordinator(pytest_container, vss_commitment, coordinator)
     
-    trusted_dealer = FrostTrustedDealer.from_private_bytes(vector.group_secret_key, vector.MIN_PARTICIPANTS, vector.participant_list, test_participant_connections, test_coordinator_connection, curve_con())
+    trusted_dealer = FrostTrustedDealer.from_private_bytes(curve.encoding.encode_scalar(vector.group_secret_key), vector.MIN_PARTICIPANTS, vector.participant_list, test_participant_connections, test_coordinator_connection, curve_con())
     mocker.patch('eddsa_threshold.eddsa.curves.base.scalar_ops.ScalarOps.random_scalar', return_value=vector.share_polynomial_coefficients[1])
     trusted_dealer.keygen()
     
