@@ -11,7 +11,7 @@ authors = [
 ]
 description = "Educational EdDSA and FROST implementations"
 readme = "README.md"
-license = "0BSD"
+license = "BSD-3-Clause"
 requires-python = ">=3.14"
 dependencies = []
 keywords = ["cryptography", "threshold", "eddsa", "frost"]
