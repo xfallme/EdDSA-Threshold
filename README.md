@@ -6,6 +6,9 @@
 
 This repository contains two different but linked implementations. The first is a "normal" single- party DSA, in this case EdDSA. The second is a multi-party threshold signature scheme, namely FROST.
 
+> [!TIP]
+> This repository contains the source code of the package published over at [https://pypi.org/project/eddsa-threshold/](https://pypi.org/project/eddsa-threshold/). If you are just interest in the process and want to try it out, you can check out the playground repository [here](https://github.com/xfallme/EdDSA-Threshold-Playground).
+
 ## EdDSA
 
 Although this implementation is strictly educational, it follows the standard for EdDSA as specified in [RFC 8032](https://datatracker.ietf.org/doc/html/rfc8032).
