@@ -67,7 +67,6 @@ class FrostParticipant:
         if signing_package.session_id not in self._nonce_pair:
             raise ValueError(f"participant {self.PARTICIPANT_ID} must commit to this signing session before signing")
 
-        nonce_pair = self._nonce_pair[signing_package.session_id]
         signature_share = self._sign(signing_package.session_id, signing_package.message, list(signing_package.commitments.values()))
 
         self._nonce_pair.pop(signing_package.session_id)  # clear nonce pair for this session since signing is complete
