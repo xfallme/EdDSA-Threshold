@@ -3,7 +3,7 @@ from typing import Final, Tuple
 
 from eddsa_threshold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshold.frost.core.base.frost_hashing import FrostHashing
-from eddsa_threshold.frost.core.frost_types import GroupInfo, NonceCommitment, ParticipantId, SecretShare, SecretValue, SessionId, SigningPackage, VSSCommitment
+from eddsa_threshold.frost.core.frost_types import NonceCommitment, ParticipantId, SecretShare, SecretValue, SessionId, SigningPackage, VSSCommitment
 from eddsa_threshold.frost.core.polynomial import derive_interpolating_value
 from eddsa_threshold.frost.core.util import binding_factor_for_participant, compute_binding_factors, compute_group_commitment, derive_group_info
 

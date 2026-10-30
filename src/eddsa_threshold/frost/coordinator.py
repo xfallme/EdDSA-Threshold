@@ -2,7 +2,7 @@ from typing import Final
 
 from eddsa_threshold.eddsa.curves.base.edwards_curve import EdwardsCurve
 from eddsa_threshold.frost.core.base.frost_hashing import FrostHashing
-from eddsa_threshold.frost.core.frost_types import GroupInfo, NonceCommitment, ParticipantId, SecretValue, SessionId, SigningPackage, SigningSession, VSSCommitment
+from eddsa_threshold.frost.core.frost_types import NonceCommitment, ParticipantId, SecretValue, SessionId, SigningPackage, SigningSession, VSSCommitment
 from eddsa_threshold.frost.core.util import check_participant_bounds, compute_binding_factors, compute_group_commitment, derive_group_info
 
 

@@ -1,6 +1,5 @@
 from typing import Tuple
 
-from eddsa_threshold.eddsa.curves.base.scalar_ops import ScalarOps
 from eddsa_threshold.frost.core.polynomial import evaluate_polynomial, derive_interpolating_value
 from eddsa_threshold.frost.core.secrets.secret_sharing import SecretSharing
 from eddsa_threshold.frost.core.frost_types import SecretShare
