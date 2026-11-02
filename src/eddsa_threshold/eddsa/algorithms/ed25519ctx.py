@@ -1,7 +1,6 @@
 from eddsa_threshold.eddsa.algorithms.ed25519 import Ed25519
 from eddsa_threshold.eddsa.keys.ed25519_keypair import Ed25519Keypair
 from eddsa_threshold.eddsa.util.dom import dom2
-from eddsa_threshold.eddsa.util.hash_bindings import sha512
 
 
 class Ed25519CTX(Ed25519):

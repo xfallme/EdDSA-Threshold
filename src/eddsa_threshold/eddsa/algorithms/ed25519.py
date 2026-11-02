@@ -1,6 +1,5 @@
 from typing import Callable
 from eddsa_threshold.eddsa.curves.ed25519.ed25519_curve import Ed25519Curve
-from eddsa_threshold.eddsa.curves.ed25519.scalar_ops import Ed25519ScalarOps
 from eddsa_threshold.eddsa.curves.ed25519.constants import SCALAR_SIZE
 from eddsa_threshold.eddsa.keys.ed25519_keypair import Ed25519Keypair
 from eddsa_threshold.eddsa.util.dom import dom2

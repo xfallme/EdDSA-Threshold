@@ -1,7 +1,6 @@
 from typing import Callable
 from eddsa_threshold.eddsa.curves.ed448.constants import SCALAR_SIZE, SIGNATURE_SIZE
 from eddsa_threshold.eddsa.curves.ed448.ed448_curve import Ed448Curve
-from eddsa_threshold.eddsa.curves.ed448.scalar_ops import Ed448ScalarOps
 from eddsa_threshold.eddsa.keys.ed448_keypair import Ed448Keypair
 from eddsa_threshold.eddsa.util.dom import dom4
 from eddsa_threshold.eddsa.util.hash_bindings import shake256
